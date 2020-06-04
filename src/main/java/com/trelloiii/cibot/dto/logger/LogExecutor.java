@@ -7,8 +7,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
 
 public class LogExecutor {
-    private Consumer<SendMessage> messageConsumer;
-    private String chatId;
+    private final Consumer<SendMessage> messageConsumer;
+    private final String chatId;
     public LogExecutor(Consumer<SendMessage> messageConsumer, String chatId) {
         this.messageConsumer = messageConsumer;
         this.chatId = chatId;

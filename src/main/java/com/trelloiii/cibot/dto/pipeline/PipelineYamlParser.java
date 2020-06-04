@@ -1,18 +1,12 @@
-package com.trelloiii.cibot.dto;
+package com.trelloiii.cibot.dto.pipeline;
 
-import com.trelloiii.cibot.model.pipeline.Instruction;
-import com.trelloiii.cibot.model.pipeline.Pipeline;
-import com.trelloiii.cibot.model.pipeline.PipelineConfiguration;
-import com.trelloiii.cibot.model.pipeline.Stage;
+import com.trelloiii.cibot.model.Pipeline;
 import lombok.val;
 import org.yaml.snakeyaml.Yaml;
-import sun.nio.cs.ext.IBM300;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PipelineYamlParser {
     private final Yaml yaml;

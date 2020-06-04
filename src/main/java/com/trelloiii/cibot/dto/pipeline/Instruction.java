@@ -1,4 +1,5 @@
-package com.trelloiii.cibot.model.pipeline;
+package com.trelloiii.cibot.dto.pipeline;
+
 import com.trelloiii.cibot.dto.logger.LogExecutor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,21 +15,26 @@ public class Instruction {
     private String text;
     private String directory;
     private Boolean status;
-    public Instruction(String text,String directory) {
+
+    public Instruction(String text, String directory) {
         this.text = text;
-        this.directory=directory;
+        this.directory = directory;
     }
 
-    public void execute(LogExecutor logExecutor){
+    public int execute(LogExecutor logExecutor) {
         try {
             Process p = Runtime.getRuntime().exec(
                     text.split(" "), //cmd
                     null,
                     new File(directory));// in this dir run cmd
-            readLog(p.getErrorStream(),logExecutor,true);
-            readLog(p.getInputStream(),logExecutor,false);
+            readLog(p.getErrorStream(), logExecutor, true);
+            readLog(p.getInputStream(), logExecutor, false);
+            int code = p.exitValue();
+            status = code == 0;
+            return code;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return -1;
     }
 }

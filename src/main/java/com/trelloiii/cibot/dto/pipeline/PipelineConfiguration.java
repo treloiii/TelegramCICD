@@ -1,4 +1,4 @@
-package com.trelloiii.cibot.model.pipeline;
+package com.trelloiii.cibot.dto.pipeline;
 
 import lombok.Builder;
 import lombok.Data;
