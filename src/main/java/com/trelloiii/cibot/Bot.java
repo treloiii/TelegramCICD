@@ -1,5 +1,6 @@
 package com.trelloiii.cibot;
 
+import com.trelloiii.cibot.dto.message.ForkProcessor;
 import com.trelloiii.cibot.dto.pipeline.LoggablePipeline;
 import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
 import com.trelloiii.cibot.dto.pipeline.PipelineService;
@@ -35,12 +36,13 @@ public class Bot extends TelegramLongPollingBot {
     private String botToken;
     private final PipelineService pipelineService;
     private PipelineFactory pipelineFactory=null;
-
+    private final ForkProcessor forkProcessor;
 
     @Autowired
-    public Bot(UserService userService,PipelineService pipelineService) {
+    public Bot(UserService userService, PipelineService pipelineService, ForkProcessor forkProcessor) {
         this.userService = userService;
         this.pipelineService=pipelineService;
+        this.forkProcessor = forkProcessor;
     }
 
     @SneakyThrows
@@ -49,50 +51,51 @@ public class Bot extends TelegramLongPollingBot {
         System.out.println("new message!");
         String message=update.getMessage().getText();
         String chatId=update.getMessage().getChatId().toString();
-        SendMessage sendMessage;
-        switch (message){
-            case "start":
-            case "main":
-                sendMessage=new SendMessage(chatId,"What can I help???");
-                setStartupButtons(sendMessage);
-                execute(sendMessage);
-                break;
-            case "Create pipeline":
-                pipelineFactory=new PipelineFactory();
-                sendMessage=new SendMessage(chatId,"Lets define name of a pipeline");
-                setPipelineButtons(sendMessage);
-                execute(sendMessage);
-                break;
-            default:
-                if(pipelineFactory!=null){
-                    if(message.equals("One stage back <--")){
-                        pipelineFactory.backStep();
-                        sendMessage=new SendMessage(chatId,pipelineFactory.size());
-                        setPipelineButtons(sendMessage);
-                        execute(sendMessage);
-                    }
-                    else {
-                        boolean result = pipelineFactory.addStep(message);
-                        if (result) {
-                            Pipeline pipeline = pipelineFactory.buildPipeline();
-                            pipelineFactory = null;
-                            sendMessage = new SendMessage(chatId, "Your pipeline successfully created!");
-                            setStartupButtons(sendMessage);
-                            execute(sendMessage);
-                            //SAVE PIPELINE IN DB
-                        } else {
-                            sendMessage = new SendMessage(chatId, pipelineFactory.size());
-                            setPipelineButtons(sendMessage);
-                            execute(sendMessage);
-                        }
-                    }
-                }
-                else{
-                    sendMessage=new SendMessage(chatId,"What can I help???");
-                    setStartupButtons(sendMessage);
-                    execute(sendMessage);
-                }
-        }
+        SendMessage sendMessage=forkProcessor.processMessage(message,chatId);
+        execute(sendMessage);
+//        switch (message){
+//            case "start":
+//            case "main":
+//                sendMessage=new SendMessage(chatId,"What can I help???");
+//                setStartupButtons(sendMessage);
+//                execute(sendMessage);
+//                break;
+//            case "Create pipeline":
+//                pipelineFactory=new PipelineFactory();
+//                sendMessage=new SendMessage(chatId,"Lets define name of a pipeline");
+//                setPipelineButtons(sendMessage);
+//                execute(sendMessage);
+//                break;
+//            default:
+//                if(pipelineFactory!=null){
+//                    if(message.equals("One stage back <--")){
+//                        pipelineFactory.backStep();
+//                        sendMessage=new SendMessage(chatId,pipelineFactory.size());
+//                        setPipelineButtons(sendMessage);
+//                        execute(sendMessage);
+//                    }
+//                    else {
+//                        boolean result = pipelineFactory.addStep(message);
+//                        if (result) {
+//                            Pipeline pipeline = pipelineFactory.buildPipeline();
+//                            pipelineFactory = null;
+//                            sendMessage = new SendMessage(chatId, "Your pipeline successfully created!");
+//                            setStartupButtons(sendMessage);
+//                            execute(sendMessage);
+//                            //SAVE PIPELINE IN DB
+//                        } else {
+//                            sendMessage = new SendMessage(chatId, pipelineFactory.size());
+//                            setPipelineButtons(sendMessage);
+//                            execute(sendMessage);
+//                        }
+//                    }
+//                }
+//                else{
+//                    sendMessage=new SendMessage(chatId,"What can I help???");
+//                    setStartupButtons(sendMessage);
+//                    execute(sendMessage);
+//                }
+//        }
 //        User user = update.getMessage().getFrom();
 //        if (!userService.checkIfExists(user)) {
 //            userService.saveUser(user);

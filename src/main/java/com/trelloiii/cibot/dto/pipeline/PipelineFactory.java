@@ -8,6 +8,21 @@ import java.util.Queue;
 
 public class PipelineFactory {
     Deque<String> steps=new LinkedList<>();
+    private static PipelineFactory pipelineFactory=null;
+    private PipelineFactory(){}
+    public static boolean haveInstance(){
+        return pipelineFactory==null;
+    }
+    public static PipelineFactory getInstance(){
+        return pipelineFactory;
+    }
+    public static void instance(){
+        if(pipelineFactory==null)
+            pipelineFactory=new PipelineFactory();
+    }
+    public static void nullFactory(){
+        pipelineFactory=null;
+    }
     public boolean addStep(String param){
         steps.addLast(param);
         if(steps.size()>=3){
@@ -15,8 +30,11 @@ public class PipelineFactory {
         }
         return false;
     }
-    public void backStep(){
+    public boolean backStep(){
+        if (steps.size()==0)
+            return true;
         steps.pollLast();
+        return false;
     }
     public String size(){
         switch (steps.size()){
