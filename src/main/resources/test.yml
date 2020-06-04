@@ -1,0 +1,17 @@
+name: test project
+dist: current_dir
+moveTo: prod_dir
+stages:
+  prebuild:
+    instructions:
+      - pwd
+      - ls
+      - ifconfig
+  build:
+    instructions:
+      - ls
+      - mvn package
+  afterbuild:
+    instructions:
+      - echo 'suka mlya'
+
