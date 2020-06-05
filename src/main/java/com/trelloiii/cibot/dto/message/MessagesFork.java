@@ -22,7 +22,7 @@ public class MessagesFork extends AbstractFork {
     private SendMessage createPipeline(String chatId) {
         PipelineFactory.instance();
         SendMessage sendMessage=new SendMessage(chatId,"Lets define name of a pipeline");
-        setPipelineButtons(sendMessage);
+        setOneRowButtons(sendMessage,"Main","One stage back <--");
         return sendMessage;
     }
 }

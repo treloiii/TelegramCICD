@@ -59,7 +59,7 @@ public class FactoryFork extends AbstractFork {
 
     private SendMessage factoryStep(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, pipelineFactory.size());
-        setPipelineButtons(sendMessage);
+        setOneRowButtons(sendMessage,"Main","One stage back <--");
         return sendMessage;
     }
 }

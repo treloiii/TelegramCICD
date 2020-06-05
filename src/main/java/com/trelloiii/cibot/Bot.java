@@ -49,53 +49,9 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         System.out.println("new message!");
-        String message=update.getMessage().getText();
-        String chatId=update.getMessage().getChatId().toString();
-        SendMessage sendMessage=forkProcessor.processMessage(message,chatId);
+        SendMessage sendMessage=forkProcessor.processMessage(update.getMessage());
         execute(sendMessage);
-//        switch (message){
-//            case "start":
-//            case "main":
-//                sendMessage=new SendMessage(chatId,"What can I help???");
-//                setStartupButtons(sendMessage);
-//                execute(sendMessage);
-//                break;
-//            case "Create pipeline":
-//                pipelineFactory=new PipelineFactory();
-//                sendMessage=new SendMessage(chatId,"Lets define name of a pipeline");
-//                setPipelineButtons(sendMessage);
-//                execute(sendMessage);
-//                break;
-//            default:
-//                if(pipelineFactory!=null){
-//                    if(message.equals("One stage back <--")){
-//                        pipelineFactory.backStep();
-//                        sendMessage=new SendMessage(chatId,pipelineFactory.size());
-//                        setPipelineButtons(sendMessage);
-//                        execute(sendMessage);
-//                    }
-//                    else {
-//                        boolean result = pipelineFactory.addStep(message);
-//                        if (result) {
-//                            Pipeline pipeline = pipelineFactory.buildPipeline();
-//                            pipelineFactory = null;
-//                            sendMessage = new SendMessage(chatId, "Your pipeline successfully created!");
-//                            setStartupButtons(sendMessage);
-//                            execute(sendMessage);
-//                            //SAVE PIPELINE IN DB
-//                        } else {
-//                            sendMessage = new SendMessage(chatId, pipelineFactory.size());
-//                            setPipelineButtons(sendMessage);
-//                            execute(sendMessage);
-//                        }
-//                    }
-//                }
-//                else{
-//                    sendMessage=new SendMessage(chatId,"What can I help???");
-//                    setStartupButtons(sendMessage);
-//                    execute(sendMessage);
-//                }
-//        }
+
 //        User user = update.getMessage().getFrom();
 //        if (!userService.checkIfExists(user)) {
 //            userService.saveUser(user);
@@ -126,40 +82,6 @@ public class Bot extends TelegramLongPollingBot {
 //            pipeline.setName(repoName);
 //            pipelineService.execute(generateLoggable(update, pipeline));
 //        }
-    }
-
-    private ReplyKeyboardMarkup getKeyboardMarkup(){
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(false);
-        return  replyKeyboardMarkup;
-    }
-    private synchronized void setStartupButtons(SendMessage sendMessage) {
-        ReplyKeyboardMarkup replyKeyboardMarkup=getKeyboardMarkup();
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-
-        List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-        keyboardFirstRow.add(new KeyboardButton("Help"));
-        keyboardFirstRow.add(new KeyboardButton("Create pipeline"));
-
-        keyboard.add(keyboardFirstRow);
-        replyKeyboardMarkup.setKeyboard(keyboard);
-    }
-    private synchronized void setPipelineButtons(SendMessage sendMessage) {
-        ReplyKeyboardMarkup replyKeyboardMarkup=getKeyboardMarkup();
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-
-        List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow keyboardFirstRow = new KeyboardRow();
-
-        keyboardFirstRow.add(new KeyboardButton("Main"));
-        keyboardFirstRow.add(new KeyboardButton("One stage back <--"));
-
-        keyboard.add(keyboardFirstRow);
-        replyKeyboardMarkup.setKeyboard(keyboard);
     }
 
     private LoggablePipeline generateLoggable(Update update, Pipeline pipeline) {
