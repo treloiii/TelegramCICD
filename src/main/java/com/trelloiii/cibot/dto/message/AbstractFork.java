@@ -7,13 +7,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractFork implements Fork {
-    public SendMessage mainProcess(String chatId,String message){
+    public List<SendMessage> mainProcess(String chatId,String message){
         SendMessage sendMessage=new SendMessage(chatId,message);
-        setOneRowButtons(sendMessage,"Help","Create pipeline");
-        return sendMessage;
+        setOneRowButtons(sendMessage,"Help","Create pipeline","show my pipelines");
+        return Collections.singletonList(sendMessage);
     }
     private ReplyKeyboardMarkup getKeyboardMarkup(){
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();

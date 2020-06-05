@@ -23,6 +23,7 @@ public class PipelineHistoryService {
     public PipelineHistory writePipelineHistory(Pipeline pipeline, Stage failedStage){
         PipelineHistory history=new PipelineHistory();
         history.setExecutedAt(LocalDateTime.now());
+        history.setPipeline(pipeline);
         if(failedStage!=null) {
             history.setFailed_stage(failedStage.getName());
             Instruction failedInstruction = failedStage.getInstructions()

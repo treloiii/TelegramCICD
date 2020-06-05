@@ -9,4 +9,5 @@ public class PipelineConfiguration {
     private String name;
     private String dist;
     private String moveTo;
+    private String target;
 }

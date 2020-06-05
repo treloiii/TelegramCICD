@@ -1,12 +1,16 @@
 package com.trelloiii.cibot.dto.pipeline;
 
 import com.trelloiii.cibot.dto.logger.LogExecutor;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Stage {
     private String name;
     private List<Instruction> instructions;

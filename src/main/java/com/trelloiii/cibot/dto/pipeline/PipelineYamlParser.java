@@ -1,74 +1,111 @@
 package com.trelloiii.cibot.dto.pipeline;
 
+import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
-import lombok.val;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 public class PipelineYamlParser {
     private final Yaml yaml;
     private final String path;
     private final String name;
-    public PipelineYamlParser(String path,String name) {
+    private Pipeline pipeline;
+
+    public PipelineYamlParser(Pipeline pipeline) {
         this.yaml = new Yaml();
-        this.path = path;
-        this.name=name;
+        this.name = pipeline.getRepositoryName();
+        this.path = "./" + name + "/build.yaml";
+        this.pipeline = pipeline;
     }
-    public Pipeline parse(){
+
+    public Pipeline parse() {
         try {
             Map<String, Object> map = yaml.load(new FileInputStream(path));
-            System.out.println(map);
-            val pipeline = new Pipeline();
-            val configuration = PipelineConfiguration.builder()
-                    .dist((String) map.get("dist"))
-                    .moveTo((String) map.get("moveTo"))
-                    .name((String) map.get("name"))
-                    .build();
-            pipeline.setConfiguration(configuration);
-            List<Stage> stages = new LinkedList<>();
-            val stages1 = (LinkedHashMap<String, Object>) map.get("stages");
-            for (Map.Entry<String, Object> entry : stages1.entrySet()) {
-                Stage stage = new Stage();
-                stage.setName(entry.getKey());
-                val instructions = (LinkedHashMap<String, Object>) entry.getValue();
-                val strInstructions = (List<String>) instructions.get("instructions");
-                List<Instruction> instructionList = new ArrayList<>();
-                for (val inst : strInstructions) {
-                    instructionList.add(new Instruction(inst,String.format("./%s",name)));
-                }
-                stage.setInstructions(instructionList);
-                stages.add(stage);
-            }
+            PipelineConfiguration pipelineConfiguration = configurationParser(map);
+            pipeline.setConfiguration(pipelineConfiguration);
+
+            List<Stage> stages = new ArrayList<>(parseStages(map, pipelineConfiguration));
+            stages.addAll(notRequiredStages(pipelineConfiguration));
             stages.add(addAfterUserStages());
             pipeline.setStages(stages);
-            pipeline.setName(name);
+
             return pipeline;
+        } catch (FileNotFoundException e) {
+            throw new BuildFileNotFoundException();
         }
-        catch (IOException e){
-            e.printStackTrace();
+    }
+    public List<Stage> parseStages(Map<String, Object> map,PipelineConfiguration pipelineConfiguration){
+        String dist = pipelineConfiguration.getDist();
+        List<Stage> stages = new LinkedList<>();
+        LinkedHashMap<String, Object> parsedStages = (LinkedHashMap<String, Object>) map.get("stages");
+
+        for (Map.Entry<String, Object> entry : parsedStages.entrySet()) {
+            Stage stage = new Stage();
+            stage.setName(entry.getKey());
+            LinkedHashMap<String, Object> instructions = (LinkedHashMap<String, Object>) entry.getValue();
+            List<String> strInstructions = (List<String>) instructions.get("instructions");
+            List<Instruction> instructionList = new ArrayList<>();
+            for (String inst : strInstructions) {
+                instructionList.add(new Instruction(inst, dist));
+            }
+            stage.setInstructions(instructionList);
+            stages.add(stage);
         }
-        return null;
+        return stages;
+    }
+    public PipelineConfiguration configurationParser(Map<String, Object> map) {
+        String dist = (String) map.get("dist");
+        String moveTo = (String) map.get("moveTo");
+        String target = (String) map.get("target");
+        return PipelineConfiguration.builder()
+                .dist(dist == null ? name : dist)
+                .moveTo(moveTo)
+                .target(target)
+                .build();
+    }
+
+    public List<Stage> notRequiredStages(PipelineConfiguration pipelineConfiguration) {
+        List<Stage> result = new ArrayList<>();
+        String moveTo = pipelineConfiguration.getMoveTo();
+        String target = pipelineConfiguration.getTarget();
+        String dist = pipelineConfiguration.getDist();
+        if (moveTo!=null&&target!=null) {
+            Stage stage = new Stage();
+            stage.setName("moveTo");
+            stage.setSystem(true);
+            String flags="";
+            File check=new File(dist);
+            if(check.isDirectory())
+                flags="-r";
+            stage.setInstructions(Collections.singletonList(
+                    new Instruction(String.format("cp -f %s %s/%s %s",flags, dist,target, moveTo), "./"))
+            );
+            result.add(stage);
+        }
+        return result;
     }
 
     @Deprecated
     private Stage addBeforeUserStages() {
-        Stage finalStage=new Stage();
+        Stage finalStage = new Stage();
         finalStage.setSystem(true);
         finalStage.setInstructions(Collections.singletonList(
-                new Instruction(String.format("cd %s",name),"./")
+                new Instruction(String.format("cd %s", name), "./")
         ));
         finalStage.setName("ss");
         return finalStage;
     }
+
     private Stage addAfterUserStages() {
-        Stage afterStage=new Stage();
+        Stage afterStage = new Stage();
         afterStage.setSystem(true);
         afterStage.setName("ss1");
         afterStage.setInstructions(Collections.singletonList(
-                new Instruction(String.format("rm -r %s",name),"./"))
+                new Instruction(String.format("rm -r %s", name), "./"))
         );
         return afterStage;
     }

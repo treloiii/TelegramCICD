@@ -9,6 +9,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.Collections;
+import java.util.List;
+
 @Component
 public class ActivationFork extends AbstractFork {
     private final UserService userService;
@@ -18,28 +21,28 @@ public class ActivationFork extends AbstractFork {
     }
 
     @Override
-    public SendMessage process(String message, String chatId) {
+    public List<SendMessage> process(String message, String chatId) {
         Root root = userService.getRoot();
         if(root.isActivated()){//слать нахуй
-            return new SendMessage(chatId, "Sorry, you don't have permission to this bot :(");
+            return Collections.singletonList(new SendMessage(chatId, "Sorry, you don't have permission to this bot :("));
         }else {//пытаться активировать
             if (message.equals(root.getPassword())) {
                 userService.saveUser(user);
                 SendMessage sendMessage = new SendMessage(chatId, "Your bot is active now!\nWhat can I help for u?");
                 setOneRowButtons(sendMessage, "Main", "CreatePipeline");
-                return sendMessage;
+                return Collections.singletonList(sendMessage);
             }
             else if(message.equals("generate new password")){
                 userService.generateNewRootPassword();
-                return new SendMessage(chatId,"New password generated.\n" +
-                        "You can find it in working directory of bot on the server");
+                return Collections.singletonList(new SendMessage(chatId, "New password generated.\n" +
+                        "You can find it in working directory of bot on the server"));
             }
             else {
                 SendMessage sendMessage=new SendMessage(chatId, "This bot needs to be activated.\n" +
                         "Root password for activation you can find in bot working directory on server\n" +
                         "Enter password to activate bot");
                 setOneRowButtons(sendMessage, "generate new password");
-                return sendMessage;
+                return Collections.singletonList(sendMessage);
             }
         }
     }

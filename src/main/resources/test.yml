@@ -1,6 +1,5 @@
-name: test project
-dist: current_dir
-moveTo: prod_dir
+dist: current_dir #указывает где собирать проект
+moveTo: prod_dir #указывает куда копировать проект
 stages:
   prebuild:
     instructions:

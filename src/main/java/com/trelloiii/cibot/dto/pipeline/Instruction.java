@@ -3,6 +3,7 @@ package com.trelloiii.cibot.dto.pipeline;
 import com.trelloiii.cibot.dto.logger.LogExecutor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.io.File;
 import java.util.Arrays;
@@ -36,5 +37,13 @@ public class Instruction {
             e.printStackTrace();
         }
         return -1;
+    }
+    @SneakyThrows
+    public void execute(){
+        Process p = Runtime.getRuntime().exec(
+                text.split(" "), //cmd
+                null,
+                new File(directory));// in this dir run cmd
+        p.waitFor();
     }
 }
