@@ -1,12 +1,11 @@
 package com.trelloiii.cibot.model;
-
-import com.trelloiii.cibot.dto.pipeline.PipelineConfiguration;
 import com.trelloiii.cibot.dto.pipeline.Stage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Data
@@ -26,7 +25,7 @@ public class Pipeline {
     @Transient
     private List<Stage> stages;
     @Transient
-    private PipelineConfiguration configuration;
+    private Map<String,Object> configuration;
 
     public Pipeline(String name, String repositoryName, String oauthToken) {
         this.name=name;

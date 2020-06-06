@@ -1,23 +1,24 @@
-package com.trelloiii.cibot.dto.pipeline;
+package com.trelloiii.cibot.dto.pipeline.instruction;
 
 import com.trelloiii.cibot.dto.logger.LogExecutor;
+import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.zeroturnaround.exec.ProcessExecutor;
 
 import java.io.File;
-import java.util.Arrays;
 
 import static com.trelloiii.cibot.dto.logger.LoggerUtils.readLog;
 
 @Data
 @AllArgsConstructor
-public class Instruction {
+public class NativeUnixInstruction implements Instruction {
     private String text;
     private String directory;
     private Boolean status;
 
-    public Instruction(String text, String directory) {
+    public NativeUnixInstruction(String text, String directory) {
         this.text = text;
         this.directory = directory;
     }
@@ -40,10 +41,18 @@ public class Instruction {
     }
     @SneakyThrows
     public void execute(){
-        Process p = Runtime.getRuntime().exec(
-                text.split(" "), //cmd
-                null,
-                new File(directory));// in this dir run cmd
-        p.waitFor();
+//        Process p = Runtime.getRuntime().exec(
+//                text.split(" "), //cmd
+//                null,
+//                new File(directory));
+        String [] arr=text.split(" ");
+        arr[arr.length-1]+=" \\;";
+        System.out.println(new ProcessExecutor().readOutput(true).command(arr).execute().getOutput().getUTF8());// in this dir run cmd
+//        try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(p.getErrorStream()))){
+//            String err;
+//            while ((err=bufferedReader.readLine())!=null){
+//                System.out.println(err);
+//            }
+//        }
     }
 }

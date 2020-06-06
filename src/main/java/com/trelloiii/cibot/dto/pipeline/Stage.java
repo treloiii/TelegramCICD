@@ -1,6 +1,7 @@
 package com.trelloiii.cibot.dto.pipeline;
 
 import com.trelloiii.cibot.dto.logger.LogExecutor;
+import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

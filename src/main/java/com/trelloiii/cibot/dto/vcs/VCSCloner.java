@@ -1,14 +1,12 @@
 package com.trelloiii.cibot.dto.vcs;
 
-import com.trelloiii.cibot.dto.pipeline.Instruction;
-import com.trelloiii.cibot.dto.pipeline.Stage;
+import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
 import lombok.val;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Collections;
 
 public class VCSCloner {
     private String token;
@@ -40,6 +38,6 @@ public class VCSCloner {
     }
 
     public void removeRepos() {
-        new Instruction(String.format("rm -r %s",repositoryName),"./").execute();
+        new NativeUnixInstruction(String.format("rm -r %s",repositoryName),"./").execute();
     }
 }

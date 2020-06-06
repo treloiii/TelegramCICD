@@ -6,8 +6,9 @@ import lombok.Data;
 @Data
 @Builder
 public class PipelineConfiguration {
-    private String name;
-    private String dist;
-    private String moveTo;
-    private String target;
+    private boolean deleteAfter=true;
+
+    public PipelineConfiguration(boolean deleteAfter) {
+        this.deleteAfter = deleteAfter;
+    }
 }

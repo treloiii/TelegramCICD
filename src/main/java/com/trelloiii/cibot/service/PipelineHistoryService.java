@@ -1,12 +1,12 @@
 package com.trelloiii.cibot.service;
 
-import com.trelloiii.cibot.dto.pipeline.Instruction;
+import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
+import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
 import com.trelloiii.cibot.dto.pipeline.Stage;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.repository.PipelineHistoryRepository;
 import com.trelloiii.cibot.repository.PipelineRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,12 +26,12 @@ public class PipelineHistoryService {
         history.setPipeline(pipeline);
         if(failedStage!=null) {
             history.setFailed_stage(failedStage.getName());
-            Instruction failedInstruction = failedStage.getInstructions()
+            Instruction failedNativeUnixInstruction = failedStage.getInstructions()
                     .stream()
                     .filter(instruction -> !instruction.getStatus())
                     .findFirst()
                     .get();
-            history.setFailed_instruction(failedInstruction.getText());
+            history.setFailed_instruction(failedNativeUnixInstruction.getText());
             history.setStatus(true);
         }
         history.setStatus(false);
