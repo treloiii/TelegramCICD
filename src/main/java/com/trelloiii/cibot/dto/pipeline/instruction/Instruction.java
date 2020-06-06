@@ -12,6 +12,6 @@ public interface Instruction {
         throw new UnsupportedOperationException("getStatus is unsupported");
     }
     default String getText(){
-        throw new UnsupportedOperationException("getStatus is unsupported");
+        throw new UnsupportedOperationException("getText is unsupported");
     }
 }

@@ -3,13 +3,17 @@ package com.trelloiii.cibot.service;
 import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
 import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
 import com.trelloiii.cibot.dto.pipeline.Stage;
+import com.trelloiii.cibot.exceptions.PipelineNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.repository.PipelineHistoryRepository;
 import com.trelloiii.cibot.repository.PipelineRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PipelineHistoryService {
@@ -36,5 +40,11 @@ public class PipelineHistoryService {
         }
         history.setStatus(false);
         return pipelineHistoryRepository.save(history);
+    }
+    public List<PipelineHistory> getHistoryByPipelineId(String pipelineId){
+        return pipelineHistoryRepository.findFirst3ByPipelineOrderByIdDesc(
+                pipelineRepository.findById(Long.valueOf(pipelineId))
+                .orElseThrow(PipelineNotFoundException::new)
+        );
     }
 }

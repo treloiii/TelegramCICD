@@ -12,7 +12,6 @@ import java.util.List;
 @Component
 public class PipelineService {
     private final PipelineExecutor pipelineExecutor;
-    private static PipelineService pipelineService;
     private final PipelineRepository pipelineRepository;
     public PipelineService(PipelineExecutor pipelineExecutor, PipelineRepository pipelineRepository) {
         this.pipelineExecutor = pipelineExecutor;

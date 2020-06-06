@@ -1,22 +1,20 @@
 package com.trelloiii.cibot.dto.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trelloiii.cibot.dto.pipeline.LoggablePipeline;
+import com.trelloiii.cibot.dto.pipeline.BuildStarter;
 import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
-import com.trelloiii.cibot.dto.pipeline.PipelineYamlParser;
-import com.trelloiii.cibot.dto.vcs.VCSCloner;
-import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
+import com.trelloiii.cibot.model.PipelineHistory;
+import com.trelloiii.cibot.service.PipelineHistoryService;
 import com.trelloiii.cibot.service.PipelineService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,10 +24,12 @@ import java.util.function.Consumer;
 public class MessagesFork extends AbstractFork {
     private final PipelineService pipelineService;
     final ObjectMapper objectMapper;
+    private final PipelineHistoryService pipelineHistoryService;
     @Autowired
-    public MessagesFork(PipelineService pipelineService, ObjectMapper objectMapper) {
+    public MessagesFork(PipelineService pipelineService, ObjectMapper objectMapper, PipelineHistoryService pipelineHistoryService) {
         this.pipelineService = pipelineService;
         this.objectMapper = objectMapper;
+        this.pipelineHistoryService = pipelineHistoryService;
     }
 
     @Override
@@ -45,31 +45,51 @@ public class MessagesFork extends AbstractFork {
                 return mainProcess(chatId,"What can I help you?");
         }
     }
-
+    private String fixedString(String s,String joiner){
+        StringBuilder sb=new StringBuilder();
+        sb.append(s);
+        int len=joiner.equals(" ")?50:150;
+        if (s.length()<len) {
+            for (int i = 0; i < len-s.length(); i++) {
+                sb.append(joiner);
+            }
+        }
+        return sb.toString();
+    }
     @Override
     public List<SendMessage> processCallback(String message, String data, String chatId, Consumer<SendMessage> sendMessageConsumer) {
         switch (message){
             case "start":
-                Pipeline pipeline=pipelineService.getPipeline(data);
-                VCSCloner vcsCloner=new VCSCloner(pipeline.getOauthToken(),pipeline.getRepositoryName());
-                vcsCloner.cloneRepos();
-                //^parse vcs
-
-                PipelineYamlParser parser = new PipelineYamlParser(pipeline);
-                try {
-                    pipeline = parser.parse();
+                return BuildStarter.start(pipelineService, data, chatId, sendMessageConsumer);
+            case "history":
+                List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipelineId(data);
+                SendMessage sendMessage=new SendMessage();
+                sendMessage.enableMarkdown(true);
+                sendMessage.setChatId(chatId);
+                if(pipelineHistory.size()>0) {
+                    String tableHat=String.join(" | "
+                            , fixedString("Executed at"," "),
+                            fixedString("Status"," ")
+                            ,fixedString("Failed command"," "));
+                    String tableDelimeter=fixedString("","-");
+                    StringBuilder stringBuilder=new StringBuilder();
+                    stringBuilder.append(tableHat).append("\n").append(tableDelimeter).append("\n");
+                    for(PipelineHistory history:pipelineHistory){
+                        stringBuilder.append(String.join(
+                                " | ",
+                                fixedString(history.getExecutedAt().format(DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm"))," "),
+                                fixedString(history.getStatus() ? "success" : "failed"," "),
+                                fixedString(history.getFailed_stage()==null?"":history.getFailed_stage()," "),
+                                fixedString(history.getFailed_instruction()==null?"":history.getFailed_instruction()," ")
+                        ))
+                        .append("\n");
+                    }
+                    sendMessage.setText(stringBuilder.toString());
                 }
-                catch (BuildFileNotFoundException e){
-                    vcsCloner.removeRepos();
-                    return Collections.singletonList(new SendMessage(chatId,e.getMessage()));
+                else{
+                    sendMessage.setText("*HISTORY EMPTY*");
                 }
-                pipelineService.execute(generateLoggable(chatId, pipeline,sendMessageConsumer));
-                return Collections.singletonList(
-                        new SendMessage(
-                                chatId,
-                                String.format("Pipeline with id %s started!", data)
-                        )
-                );
+                sendMessageConsumer.accept(sendMessage);
             case "delete":
             default:
                 return Collections.singletonList(
@@ -80,13 +100,7 @@ public class MessagesFork extends AbstractFork {
                 );
         }
     }
-    private LoggablePipeline generateLoggable(String chatId, Pipeline pipeline,Consumer<SendMessage> sendMessageConsumer) {
-        LoggablePipeline loggablePipeline = new LoggablePipeline();
-        loggablePipeline.setId(chatId);
-        loggablePipeline.setPipeline(pipeline);
-        loggablePipeline.setSendMessageConsumer(sendMessageConsumer);
-        return loggablePipeline;
-    }
+
     private List<SendMessage> showPipelines(String chatId) {
         List<Pipeline> pipelineList=pipelineService.getPipelines();
         List<SendMessage> result=new ArrayList<>();
@@ -115,6 +129,8 @@ public class MessagesFork extends AbstractFork {
                 .setCallbackData("msg&start&"+pipeline.getId().toString()));
         buttons1.add(new InlineKeyboardButton().setText("delete")
                 .setCallbackData("msg&delete&"+pipeline.getId().toString()));
+        buttons1.add(new InlineKeyboardButton().setText("history")
+                .setCallbackData("msg&history&"+pipeline.getId().toString()));
         buttons.add(buttons1);
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         markupKeyboard.setKeyboard(buttons);
