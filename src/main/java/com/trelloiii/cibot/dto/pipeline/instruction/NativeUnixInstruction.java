@@ -4,8 +4,10 @@ import com.trelloiii.cibot.dto.logger.LogExecutor;
 import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
 import lombok.*;
 import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
 
-import java.io.File;
+import java.io.*;
+import java.util.stream.Stream;
 
 import static com.trelloiii.cibot.dto.logger.LoggerUtils.readLog;
 
@@ -31,15 +33,13 @@ public class NativeUnixInstruction implements Instruction {
 
     public int execute(LogExecutor logExecutor) {
         try {
-            Process p = Runtime.getRuntime().exec(
-                    text.split(" "), //cmd
-                    null,
-                    new File(directory));// in this dir run cmd
-
-            readLog(p.getInputStream(), logExecutor, false);
-            readLog(p.getErrorStream(), logExecutor, true);
-            int code = p.exitValue();
+            ProcessResult res=new ProcessExecutor(text.split(" "))
+                    .directory(new File(directory))
+                    .readOutput(true)
+                    .execute();
+            int code=res.getExitValue();
             status = code == 0;
+            readLog(res.getOutput().getLines(),logExecutor,!status);
             if(ignoreOnExit){
                 status=true;
                 code=0;
@@ -53,12 +53,8 @@ public class NativeUnixInstruction implements Instruction {
 
     @SneakyThrows
     public void execute() {
-        Process p = Runtime.getRuntime().exec(
-                    text.split(" "), //cmd
-                    null,
-                    new File(directory));
-//        String[] arr = text.split(" ");
-//        arr[arr.length - 1] += " \\;";
-//        System.out.println(new ProcessExecutor().readOutput(true).command(arr).execute().getOutput().getUTF8());// in this dir run cmd
+        new ProcessExecutor(text.split(" ")) //cmd
+                .directory(new File(directory)) // in this dir we run cmd
+                .execute();
     }
 }

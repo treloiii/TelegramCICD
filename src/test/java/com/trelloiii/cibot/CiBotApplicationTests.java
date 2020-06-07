@@ -15,16 +15,5 @@ import java.util.List;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 class CiBotApplicationTests {
-    @Autowired
-    private PipelineHistoryService pipelineHistoryService;
-    @BeforeAll
-    public static void context(){
-        ApiContextInitializer.init();
-    }
-    @Test
-    public void testGetLastThreeInHistory(){
-        List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipelineId("3");
-    }
-
 
 }

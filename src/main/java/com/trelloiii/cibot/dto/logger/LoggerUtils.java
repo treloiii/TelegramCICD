@@ -3,6 +3,7 @@ package com.trelloiii.cibot.dto.logger;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class LoggerUtils {
     public static void readLog(InputStream inputStream, LogExecutor logExecutor, boolean isError) {
@@ -18,7 +19,9 @@ public class LoggerUtils {
     public static void readLog(String log,LogExecutor logExecutor,boolean isError){
         sendLog(log,logExecutor,isError);
     }
-
+    public static void readLog(List<String> logs,LogExecutor logExecutor,boolean isError){
+        logs.forEach(log->sendLog(log,logExecutor,isError));
+    }
     public static void sendLog(String output, LogExecutor logExecutor, boolean isError) {
         try {
             if (!output.isEmpty()) {

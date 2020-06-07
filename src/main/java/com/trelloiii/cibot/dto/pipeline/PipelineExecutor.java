@@ -50,8 +50,10 @@ public class PipelineExecutor {
                 stageList.stream()
                         .filter(Stage::getSystem)
                         .forEach(Stage::execute);
-//                loggablePipeline.getSendMessageConsumer().accept(new SendMessage(loggablePipeline.getId(),"*BUILD COMPLETE WITH ERRORS*"));
             }
+            SendMessage finalLog=new SendMessage(loggablePipeline.getId(),"*BUILD COMPLETE*");
+            finalLog.enableMarkdown(true);
+            loggablePipeline.getSendMessageConsumer().accept(finalLog);
             pipelineHistoryService.writePipelineHistory(pipeline, failed);
         }
     }
