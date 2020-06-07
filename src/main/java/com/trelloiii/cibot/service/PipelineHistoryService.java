@@ -1,15 +1,12 @@
 package com.trelloiii.cibot.service;
 
 import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
-import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
 import com.trelloiii.cibot.dto.pipeline.Stage;
 import com.trelloiii.cibot.exceptions.PipelineNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.repository.PipelineHistoryRepository;
 import com.trelloiii.cibot.repository.PipelineRepository;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,6 +25,7 @@ public class PipelineHistoryService {
         PipelineHistory history=new PipelineHistory();
         history.setExecutedAt(LocalDateTime.now());
         history.setPipeline(pipeline);
+        history.setStatus(false);
         if(failedStage!=null) {
             history.setFailed_stage(failedStage.getName());
             Instruction failedNativeUnixInstruction = failedStage.getInstructions()
@@ -38,13 +36,15 @@ public class PipelineHistoryService {
             history.setFailed_instruction(failedNativeUnixInstruction.getText());
             history.setStatus(true);
         }
-        history.setStatus(false);
         return pipelineHistoryRepository.save(history);
     }
     public List<PipelineHistory> getHistoryByPipelineId(String pipelineId){
-        return pipelineHistoryRepository.findFirst3ByPipelineOrderByIdDesc(
+        return pipelineHistoryRepository.findTop3ByPipelineOrderByIdDesc(
                 pipelineRepository.findById(Long.valueOf(pipelineId))
                 .orElseThrow(PipelineNotFoundException::new)
         );
+    }
+    public List<PipelineHistory> getHistoryByPipeline(Pipeline pipeline){
+        return pipelineHistoryRepository.findTop3ByPipelineOrderByIdDesc(pipeline);
     }
 }

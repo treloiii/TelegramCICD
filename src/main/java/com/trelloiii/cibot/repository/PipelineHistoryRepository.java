@@ -8,5 +8,5 @@ import java.awt.print.Pageable;
 import java.util.List;
 
 public interface PipelineHistoryRepository extends JpaRepository<PipelineHistory,Long> {
-    List<PipelineHistory> findFirst3ByPipelineOrderByIdDesc(Pipeline pipeline);
+    List<PipelineHistory> findTop3ByPipelineOrderByIdDesc(Pipeline pipeline);
 }

@@ -62,23 +62,27 @@ public class MessagesFork extends AbstractFork {
             case "start":
                 return BuildStarter.start(pipelineService, data, chatId, sendMessageConsumer);
             case "history":
-                List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipelineId(data);
+                Pipeline pipeline=pipelineService.getPipeline(data);
+                List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipeline(pipeline);
                 SendMessage sendMessage=new SendMessage();
                 sendMessage.enableMarkdown(true);
                 sendMessage.setChatId(chatId);
+                String head=String.format("_history of %s_",pipeline.getName());
                 if(pipelineHistory.size()>0) {
-                    String tableHat=String.join(" | "
-                            , fixedString("Executed at"," "),
-                            fixedString("Status"," ")
-                            ,fixedString("Failed command"," "));
+                    String tableHat=String.join(" | ",
+                            fixedString("Executed at"," "),
+                            fixedString("Status"," "),
+                            fixedString("Failed stage"," "),
+                            fixedString("Failed command"," "));
                     String tableDelimeter=fixedString("","-");
                     StringBuilder stringBuilder=new StringBuilder();
+                    stringBuilder.append(head).append("\n");
                     stringBuilder.append(tableHat).append("\n").append(tableDelimeter).append("\n");
                     for(PipelineHistory history:pipelineHistory){
                         stringBuilder.append(String.join(
                                 " | ",
-                                fixedString(history.getExecutedAt().format(DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm"))," "),
-                                fixedString(history.getStatus() ? "success" : "failed"," "),
+                                fixedString(history.getExecutedAt().format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm"))," "),
+                                fixedString(!history.getStatus() ? "success" : "failed"," "),
                                 fixedString(history.getFailed_stage()==null?"":history.getFailed_stage()," "),
                                 fixedString(history.getFailed_instruction()==null?"":history.getFailed_instruction()," ")
                         ))
@@ -87,9 +91,9 @@ public class MessagesFork extends AbstractFork {
                     sendMessage.setText(stringBuilder.toString());
                 }
                 else{
-                    sendMessage.setText("*HISTORY EMPTY*");
+                    sendMessage.setText(head+"\n"+"*EMPTY*");
                 }
-                sendMessageConsumer.accept(sendMessage);
+                return Collections.singletonList(sendMessage);
             case "delete":
             default:
                 return Collections.singletonList(
