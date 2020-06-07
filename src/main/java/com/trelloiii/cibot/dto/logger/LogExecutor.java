@@ -18,7 +18,7 @@ public class LogExecutor {
     public void sendLog(String log) throws InterruptedException {
         SendMessage sendMessage = new SendMessage(this.chatId, log);
         sendMessage.enableMarkdown(true);
-        Thread.sleep(250);
+        Thread.sleep(100);
         messageConsumer.accept(sendMessage);
     }
 }

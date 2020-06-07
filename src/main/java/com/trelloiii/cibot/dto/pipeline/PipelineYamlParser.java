@@ -9,10 +9,10 @@ import com.trelloiii.cibot.model.Pipeline;
 import lombok.val;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class PipelineYamlParser {
     private final Yaml yaml;
@@ -30,13 +30,13 @@ public class PipelineYamlParser {
     public Pipeline parse() {
         try {
             Map<String, Object> map = yaml.load(new FileInputStream(path));
-            Map<String,Object> pipelineConfiguration = configurationParser(map);
+            Map<String, Object> pipelineConfiguration = configurationParser(map);
             pipeline.setConfiguration(pipelineConfiguration);
 
             List<Stage> stages = new ArrayList<>(parseStages(map, pipelineConfiguration));
 
-            if((Boolean)pipelineConfiguration.get("delete_after"))
-                stages.add(deleteAfterBuild());
+            if ((Boolean) pipelineConfiguration.get("delete_after"))
+                stages.add(systemAfterBuild());
             pipeline.setStages(stages);
 
             return pipeline;
@@ -44,7 +44,8 @@ public class PipelineYamlParser {
             throw new BuildFileNotFoundException();
         }
     }
-    public List<Stage> parseStages(Map<String, Object> map,Map<String,Object> pipelineConfiguration){
+
+    public List<Stage> parseStages(Map<String, Object> map, Map<String, Object> pipelineConfiguration) {
         List<Stage> stages = new LinkedList<>();
         Map<String, Object> parsedStages = (Map<String, Object>) map.get("stages");
 
@@ -56,16 +57,22 @@ public class PipelineYamlParser {
             List<Object> instructions = (List<Object>) namedInstructions.get("instructions");
             List<Instruction> instructionList = new ArrayList<>();
             for (Object inst : instructions) {
-                val instructionPair=(Map<String,Object>) inst;
-                for(Map.Entry<String,Object> instructionEntry: instructionPair.entrySet()){
-                    String key=instructionEntry.getKey();
-                    if(key.equals("sh")){
-                        instructionList.add(new NativeUnixInstruction((String)instructionEntry.getValue(), name));
-                    }else if(key.equals("copy")){
-                        val copyBlock=(Map<String,Object>) instructionEntry.getValue();
-                        instructionList.add(
-                                new CopyJavaInstruction(name,(String)copyBlock.get("target"),(String)copyBlock.get("dist"))
-                        );
+                val instructionPair = (Map<String, Object>) inst;
+                for (Map.Entry<String, Object> instructionEntry : instructionPair.entrySet()) {
+                    String key = instructionEntry.getKey();
+                    switch (key) {
+                        case "sh":
+                            instructionList.add(new NativeUnixInstruction((String) instructionEntry.getValue(),name));
+                            break;
+                        case "ish":
+                            instructionList.add(new NativeUnixInstruction((String) instructionEntry.getValue(),name,true));
+                            break;
+                        case "copy":
+                            val copyBlock = (Map<String, Object>) instructionEntry.getValue();
+                            instructionList.add(
+                                    new CopyJavaInstruction(name, (String) copyBlock.get("target"), (String) copyBlock.get("dist"))
+                            );
+                            break;
                     }
                 }
             }
@@ -74,13 +81,20 @@ public class PipelineYamlParser {
         }
         return stages;
     }
-    public LinkedHashMap<String,Object> configurationParser(Map<String, Object> map) {
-         return (LinkedHashMap<String, Object>) map.get("configuration");
+
+    public Map<String, Object> configurationParser(Map<String, Object> map) {
+        Map<String, Object> res = (LinkedHashMap<String, Object>) map.get("configuration");
+        if (res == null) {
+            res = new LinkedHashMap<>();
+        }
+        res.putIfAbsent("delete_after", true);
+        return res;
     }
-    private Stage deleteAfterBuild() {
+
+    private Stage systemAfterBuild() {
         Stage afterStage = new Stage();
         afterStage.setSystem(true);
-        afterStage.setName("remove_after");
+        afterStage.setName("sys_after");
         afterStage.setInstructions(Collections.singletonList(new RemoveJavaInstruction(name)));
         return afterStage;
     }

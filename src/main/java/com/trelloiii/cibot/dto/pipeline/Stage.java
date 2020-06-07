@@ -18,13 +18,21 @@ public class Stage {
     private Boolean status;
     private Boolean system = false;
 
+    public void execute(){
+        instructions.forEach(Instruction::execute);
+    }
     @SneakyThrows
     public int execute(LogExecutor logExecutor) {
         if (!system)
             logExecutor.sendLog(String.format("Starting stage: %s", this.name.toUpperCase()));
         for (Instruction instruction : instructions) {
+            if(system){
+                instruction.execute();
+                return 0;
+            }
             int code = instruction.execute(logExecutor);
             status = code == 0;
+
             if(code!=0)
                 return code;
         }
