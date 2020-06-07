@@ -60,7 +60,7 @@ public class CopyJavaInstruction extends JavaInstruction {
     @SneakyThrows
     private void copy(File src,File dist){
         if (src.isDirectory()) {
-            FileUtils.copyDirectory(src, dist);
+            FileUtils.copyDirectoryToDirectory(src, dist);
         } else {
             FileUtils.copyFileToDirectory(src,dist);
         }

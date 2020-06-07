@@ -1,0 +1,11 @@
+first: 1234
+second:
+  line1: login root -p 1234
+  line2: github log -t token
+  line3: just line
+  line4:
+    list:
+      - sh: cp /lists/dir
+      - sh: rm dir2
+      - sh: sosi pisos
+      - sh: ЖОПА

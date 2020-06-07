@@ -6,12 +6,16 @@ import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
 import com.trelloiii.cibot.dto.pipeline.instruction.RemoveJavaInstruction;
 import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PipelineYamlParser {
@@ -29,6 +33,7 @@ public class PipelineYamlParser {
 
     public Pipeline parse() {
         try {
+            parseEnv(path);
             Map<String, Object> map = yaml.load(new FileInputStream(path));
             Map<String, Object> pipelineConfiguration = configurationParser(map);
             pipeline.setConfiguration(pipelineConfiguration);
@@ -40,8 +45,27 @@ public class PipelineYamlParser {
             pipeline.setStages(stages);
 
             return pipeline;
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new BuildFileNotFoundException();
+        }
+    }
+
+
+    public void parseEnv(String path) throws IOException {
+        File yaml=new File(path);
+        List<String> lines= Files.lines(yaml.toPath()).collect(Collectors.toList());
+        String content1=String.join("\n",lines);
+        Pattern pattern= Pattern.compile("%%(.*?)%%",Pattern.DOTALL);
+        Matcher matcher=pattern.matcher(content1);
+        StringBuffer result=new StringBuffer();
+        while (matcher.find()){
+            String env=matcher.group(1);
+            String replacement=System.getenv(env);;
+            matcher.appendReplacement(result,replacement);
+        }
+        matcher.appendTail(result);
+        try(PrintWriter printWriter=new PrintWriter(new FileWriter(yaml))){
+            printWriter.print(result.toString());
         }
     }
 

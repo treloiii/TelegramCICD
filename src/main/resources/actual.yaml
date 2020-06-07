@@ -1,0 +1,11 @@
+first: %%ROOT_PASS%%
+second:
+  line1: login root -p %%ROOT_PASS%%
+  line2: github log -t %%GITHUB_TOKEN%%
+  line3: just line
+  line4:
+    list:
+      - sh: cp /lists/%%DIR_1%%
+      - sh: rm %%DIR_2%%
+      - sh: sosi pisos
+      - sh: ЖОПА
