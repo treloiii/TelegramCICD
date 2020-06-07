@@ -69,6 +69,10 @@ class SpringOutTests{
                 "test_prop2: root\n" +
                 "again_first: password\n",result.toString());
     }
+    @Test
+    public void testEmptyEnv(){
+        String emptyEnv=System.getenv("suja");
+    }
     @SneakyThrows
     @Test
     public void replaceInFileTest(){

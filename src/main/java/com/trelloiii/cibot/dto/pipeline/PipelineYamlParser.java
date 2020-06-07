@@ -5,6 +5,7 @@ import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
 import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
 import com.trelloiii.cibot.dto.pipeline.instruction.RemoveJavaInstruction;
 import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
+import com.trelloiii.cibot.exceptions.EnvironmentNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -31,7 +32,7 @@ public class PipelineYamlParser {
         this.pipeline = pipeline;
     }
 
-    public Pipeline parse() {
+    public Pipeline parse() throws EnvironmentNotFoundException {
         try {
             parseEnv(path);
             Map<String, Object> map = yaml.load(new FileInputStream(path));
@@ -51,7 +52,7 @@ public class PipelineYamlParser {
     }
 
 
-    public void parseEnv(String path) throws IOException {
+    public void parseEnv(String path) throws IOException, EnvironmentNotFoundException {
         File yaml=new File(path);
         List<String> lines= Files.lines(yaml.toPath()).collect(Collectors.toList());
         String content1=String.join("\n",lines);
@@ -60,8 +61,13 @@ public class PipelineYamlParser {
         StringBuffer result=new StringBuffer();
         while (matcher.find()){
             String env=matcher.group(1);
-            String replacement=System.getenv(env);;
-            matcher.appendReplacement(result,replacement);
+            String replacement=System.getenv(env);
+            try {
+                matcher.appendReplacement(result, replacement);
+            }
+            catch (NullPointerException e){
+                throw new EnvironmentNotFoundException(String.format("Environment %s not found",env));
+            }
         }
         matcher.appendTail(result);
         try(PrintWriter printWriter=new PrintWriter(new FileWriter(yaml))){

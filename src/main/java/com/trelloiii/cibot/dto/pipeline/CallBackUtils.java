@@ -2,6 +2,7 @@ package com.trelloiii.cibot.dto.pipeline;
 
 import com.trelloiii.cibot.dto.vcs.VCSCloner;
 import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
+import com.trelloiii.cibot.exceptions.EnvironmentNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.service.PipelineHistoryService;
@@ -35,9 +36,9 @@ public class CallBackUtils {
         try {
             pipeline = parser.parse();
         }
-        catch (BuildFileNotFoundException e){
+        catch (BuildFileNotFoundException | EnvironmentNotFoundException e){
             vcsCloner.removeRepos();
-            return Collections.singletonList(new SendMessage(chatId,e.getMessage()));
+            return Collections.singletonList(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
         }
         pipelineService.execute(generateLoggable(chatId, pipeline,sendMessageConsumer));
         return Collections.singletonList(
