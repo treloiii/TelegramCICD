@@ -15,6 +15,7 @@ public class Pipeline {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(unique = true)
     private String repositoryName;
     private String oauthToken;
     @Transient

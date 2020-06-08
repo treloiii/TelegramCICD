@@ -1,0 +1,105 @@
+Starting stage: PREBUILD
+'token d94389e98beb31776607f74d05fedc5972e0c64f'
+Starting stage: BUILD
+'build!'
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.trelloiii:demo-ci >------------------------
+[INFO] Building demo-ci 0.0.1-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:3.1.0:resources (default-resources) @ demo-ci ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 0 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.1:compile (default-compile) @ demo-ci ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 2 source files to /Users/trelloiii/Desktop/JavaProjects/ci-bot/test-ci/target/classes
+[INFO] 
+[INFO] --- maven-resources-plugin:3.1.0:testResources (default-testResources) @ demo-ci ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /Users/trelloiii/Desktop/JavaProjects/ci-bot/test-ci/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.8.1:testCompile (default-testCompile) @ demo-ci ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 1 source file to /Users/trelloiii/Desktop/JavaProjects/ci-bot/test-ci/target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.22.2:test (default-test) @ demo-ci ---
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.trelloiii.democi.DemoCiApplicationTests
+23:50:28.451 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating CacheAwareContextLoaderDelegate from class [org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate]
+23:50:28.464 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating BootstrapContext using constructor [public org.springframework.test.context.support.DefaultBootstrapContext(java.lang.Class,org.springframework.test.context.CacheAwareContextLoaderDelegate)]
+23:50:28.492 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating TestContextBootstrapper for test class [com.trelloiii.democi.DemoCiApplicationTests] from class [org.springframework.boot.test.context.SpringBootTestContextBootstrapper]
+23:50:28.513 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Neither @ContextConfiguration nor @ContextHierarchy found for test class [com.trelloiii.democi.DemoCiApplicationTests], using SpringBootContextLoader
+23:50:28.516 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.trelloiii.democi.DemoCiApplicationTests]: class path resource [com/trelloiii/democi/DemoCiApplicationTests-context.xml] does not exist
+23:50:28.516 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.trelloiii.democi.DemoCiApplicationTests]: class path resource [com/trelloiii/democi/DemoCiApplicationTestsContext.groovy] does not exist
+23:50:28.517 [main] INFO org.springframework.test.context.support.AbstractContextLoader - Could not detect default resource locations for test class [com.trelloiii.democi.DemoCiApplicationTests]: no resource found for suffixes {-context.xml, Context.groovy}.
+23:50:28.518 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.trelloiii.democi.DemoCiApplicationTests]: DemoCiApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+23:50:28.556 [main] DEBUG org.springframework.test.context.support.ActiveProfilesUtils - Could not find an 'annotation declaring class' for annotation type [org.springframework.test.context.ActiveProfiles] and class [com.trelloiii.democi.DemoCiApplicationTests]
+23:50:28.607 [main] DEBUG org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider - Identified candidate component class: file [/Users/trelloiii/Desktop/JavaProjects/ci-bot/test-ci/target/classes/com/trelloiii/democi/DemoCiApplication.class]
+23:50:28.623 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.trelloiii.democi.DemoCiApplication for test class com.trelloiii.democi.DemoCiApplicationTests
+23:50:28.713 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - @TestExecutionListeners is not present for class [com.trelloiii.democi.DemoCiApplicationTests]: using defaults.
+23:50:28.714 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener, org.springframework.test.context.event.EventPublishingTestExecutionListener]
+23:50:28.726 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Skipping candidate TestExecutionListener [org.springframework.test.context.transaction.TransactionalTestExecutionListener] due to a missing dependency. Specify custom listener classes or make the default listener classes and their required dependencies available. Offending class: [org/springframework/transaction/interceptor/TransactionAttributeSource]
+23:50:28.727 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Skipping candidate TestExecutionListener [org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener] due to a missing dependency. Specify custom listener classes or make the default listener classes and their required dependencies available. Offending class: [org/springframework/transaction/interceptor/TransactionAttribute]
+23:50:28.728 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@463fd068, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@895e367, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@1b266842, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@7a3793c7, org.springframework.test.context.support.DirtiesContextTestExecutionListener@42b3b079, org.springframework.test.context.event.EventPublishingTestExecutionListener@651aed93, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@4dd6fd0a, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@bb9e6dc, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@5456afaa, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@6692b6c6, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@1cd629b3, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener@589da3f3]
+23:50:28.731 [main] DEBUG org.springframework.test.context.support.AbstractDirtiesContextTestExecutionListener - Before test class: context [DefaultTestContext@420a85c4 testClass = DemoCiApplicationTests, testInstance = [null], testMethod = [null], testException = [null], mergedContextConfiguration = [WebMergedContextConfiguration@1c39680d testClass = DemoCiApplicationTests, locations = '{}', classes = '{class com.trelloiii.democi.DemoCiApplication}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true}', contextCustomizers = set[org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@6913c1fb, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@609cd4d8, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@0, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@f79e, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@0, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizerFactory$Customizer@3c0be339, org.springframework.boot.test.context.SpringBootTestArgs@1], resourceBasePath = 'src/main/webapp', contextLoader = 'org.springframework.boot.test.context.SpringBootContextLoader', parent = [null]], attributes = map['org.springframework.test.context.web.ServletTestExecutionListener.activateListener' -> true]], class annotated with @DirtiesContext [false] with mode [null].
+23:50:28.756 [main] DEBUG org.springframework.test.context.support.TestPropertySourceUtils - Adding inlined properties to environment: {spring.jmx.enabled=false, org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true}
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.3.0.RELEASE)
+2020-06-08 23:50:29.237  INFO 3833 --- [           main] c.t.democi.DemoCiApplicationTests        : Starting DemoCiApplicationTests on MacBook-Pro-Nikita.local with PID 3833 (started by trelloiii in /Users/trelloiii/Desktop/JavaProjects/ci-bot/test-ci)
+2020-06-08 23:50:29.238  INFO 3833 --- [           main] c.t.democi.DemoCiApplicationTests        : No active profile set, falling back to default profiles: default
+2020-06-08 23:50:30.487  INFO 3833 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2020-06-08 23:50:30.732  INFO 3833 --- [           main] c.t.democi.DemoCiApplicationTests        : Started DemoCiApplicationTests in 1.963 seconds (JVM running for 2.997)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.801 s - in com.trelloiii.democi.DemoCiApplicationTests
+2020-06-08 23:50:31.158  INFO 3833 --- [extShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- maven-jar-plugin:3.2.0:jar (default-jar) @ demo-ci ---
+[INFO] Building jar: /Users/trelloiii/Desktop/JavaProjects/ci-bot/test-ci/target/demo-ci-0.0.1-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot-maven-plugin:2.3.0.RELEASE:repackage (repackage) @ demo-ci ---
+[INFO] Replacing main artifact with repackaged archive
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.318 s
+[INFO] Finished at: 2020-06-08T23:50:32+03:00
+[INFO] ------------------------------------------------------------------------
+Starting stage: DOCKER
+'build docker image!'
+Sending build context to Docker daemon  16.72MB
+Step 1/4 : FROM openjdk:8-jdk-alpine
+ ---> a3562aa0b991
+Step 2/4 : COPY ./target/demo-ci-0.0.1-SNAPSHOT.jar /apps/app.jar
+ ---> c558aeaa0710
+Step 3/4 : EXPOSE 8000
+ ---> Running in 3377bab59376
+Removing intermediate container 3377bab59376
+ ---> 4e4eec8399a3
+Step 4/4 : CMD ["/usr/bin/java","-XX:+UnlockExperimentalVMOptions","-XX:+UseCGroupMemoryLimitForHeap","-Xmx256m","-Xss512k","-XX:MetaspaceSize=100m","-jar","/apps/app.jar"]
+ ---> Running in 2ac75afd72bc
+Removing intermediate container 2ac75afd72bc
+ ---> 98175b4da3d1
+Successfully built 98175b4da3d1
+Successfully tagged bot_ci_demo:v1
+Starting stage: AFTERBUILD
+'yep you're lax'
+starting to copy from test-ci to /Users/trelloiii/test-ci
+copy complete
+my_ci_cd
+my_ci_cd
+6e3ffc8569f277b5c604a6b95803559d442978da60af502f30f013482909afa9

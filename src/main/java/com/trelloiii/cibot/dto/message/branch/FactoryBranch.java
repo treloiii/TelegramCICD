@@ -4,6 +4,7 @@ import com.trelloiii.cibot.dto.message.branch.AbstractBranch;
 import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.service.PipelineService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -15,11 +16,6 @@ public class FactoryBranch extends AbstractBranch {
     private PipelineFactory pipelineFactory = PipelineFactory.getInstance();
     private final PipelineService pipelineService;
 
-//    {
-//        Map<String, Function<String, List<SendMessage>>> variants = new HashMap<>();
-//        variants.put("one stage back", this::stageBack);
-//        variants.put("main",mainProcess())
-//    }
     public FactoryBranch(PipelineService pipelineService) {
         this.pipelineService = pipelineService;
     }
@@ -56,16 +52,26 @@ public class FactoryBranch extends AbstractBranch {
         if (result) {
             Pipeline pipeline = pipelineFactory.buildPipeline();
             PipelineFactory.nullFactory();
-            pipelineService.savePipeline(pipeline);
-            message=mainProcess(
-                    chatId,
-                    String.format(
-                            "Your pipeline: [name: %s , repository name: %s , token: %s]",
-                            pipeline.getName(),
-                            pipeline.getRepositoryName(),
-                            pipeline.getOauthToken()
-                    )
-            );
+            try {
+                pipelineService.savePipeline(pipeline);
+                message = mainProcess(
+                        chatId,
+                        String.format(
+                                "Your pipeline: [name: %s , repository name: %s , token: %s]",
+                                pipeline.getName(),
+                                pipeline.getRepositoryName(),
+                                pipeline.getOauthToken()
+                        )
+                );
+            }
+            catch (DataIntegrityViolationException e){
+                message = mainProcess(chatId,
+                        String.format(
+                                "Duplicate repository name '%s' in pipeline, pipeline was not created",
+                                pipeline.getRepositoryName()
+                        )
+                );
+            }
         } else {
             message=factoryStep(chatId);
         }
