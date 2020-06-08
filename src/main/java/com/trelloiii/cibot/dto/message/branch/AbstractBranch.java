@@ -1,20 +1,18 @@
-package com.trelloiii.cibot.dto.message;
+package com.trelloiii.cibot.dto.message.branch;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public abstract class AbstractFork implements Fork {
-    public List<SendMessage> mainProcess(String chatId,String message){
+public abstract class AbstractBranch implements Branch {
+    public SendMessage mainProcess(Long chatId,String message){
         SendMessage sendMessage=new SendMessage(chatId,message);
         setOneRowButtons(sendMessage,"Help","Create pipeline","show my pipelines");
-        return Collections.singletonList(sendMessage);
+        return sendMessage;
     }
     private ReplyKeyboardMarkup getKeyboardMarkup(){
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();

@@ -1,57 +1,63 @@
-package com.trelloiii.cibot.dto.message;
+package com.trelloiii.cibot.dto.message.branch;
 
+import com.trelloiii.cibot.dto.message.branch.AbstractBranch;
 import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.service.PipelineService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.function.Consumer;
 
 @Component
-public class FactoryFork extends AbstractFork {
+public class FactoryBranch extends AbstractBranch {
     private PipelineFactory pipelineFactory = PipelineFactory.getInstance();
     private final PipelineService pipelineService;
 
-    public FactoryFork(PipelineService pipelineService) {
+//    {
+//        Map<String, Function<String, List<SendMessage>>> variants = new HashMap<>();
+//        variants.put("one stage back", this::stageBack);
+//        variants.put("main",mainProcess())
+//    }
+    public FactoryBranch(PipelineService pipelineService) {
         this.pipelineService = pipelineService;
     }
 
     @Override
-    public List<SendMessage> process(String message, String chatId) {
-        switch (message) {
+    public void process(Message message, Consumer<SendMessage> sendMessage) {
+        String messageText=message.getText();
+        Long chatId=message.getChatId();
+        switch (messageText) {
             case "One stage back <--":
-                return stageBack(chatId);
+                stageBack(chatId,sendMessage);
+                break;
             case "main":
                 PipelineFactory.nullFactory();
-                return this.mainProcess(chatId, "What can I help???");
+                mainProcess(chatId, "What can I help???");
+                break;
             default:
-                return queueProcess(message, chatId);
+                queueProcess(messageText, chatId,sendMessage);
         }
     }
 
-    private List<SendMessage> stageBack(String chatId) {
+    private void stageBack(Long chatId,Consumer<SendMessage> sendMessage) {
         if (pipelineFactory.backStep()) {
             PipelineFactory.nullFactory();
-            return this.mainProcess(chatId, "Something else?");
+            sendMessage.accept(mainProcess(chatId, "Something else?"));
         }
-        return factoryStep(chatId);
+        sendMessage.accept(factoryStep(chatId));
     }
 
-    private List<SendMessage> queueProcess(String message, String chatId) {
+    private void queueProcess(String text, Long chatId,Consumer<SendMessage> sendMessage) {
         this.pipelineFactory = PipelineFactory.getInstance();
-        boolean result = pipelineFactory.addStep(message);
+        boolean result = pipelineFactory.addStep(text);
+        SendMessage message;
         if (result) {
             Pipeline pipeline = pipelineFactory.buildPipeline();
             PipelineFactory.nullFactory();
             pipelineService.savePipeline(pipeline);
-            return mainProcess(
+            message=mainProcess(
                     chatId,
                     String.format(
                             "Your pipeline: [name: %s , repository name: %s , token: %s]",
@@ -61,13 +67,14 @@ public class FactoryFork extends AbstractFork {
                     )
             );
         } else {
-            return factoryStep(chatId);
+            message=factoryStep(chatId);
         }
+        sendMessage.accept(message);
     }
 
-    private List<SendMessage> factoryStep(String chatId) {
+    private SendMessage factoryStep(Long chatId) {
         SendMessage sendMessage = new SendMessage(chatId, pipelineFactory.size());
         setOneRowButtons(sendMessage,"Main","One stage back <--");
-        return Collections.singletonList(sendMessage);
+        return sendMessage;
     }
 }

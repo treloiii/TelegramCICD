@@ -1,6 +1,6 @@
-package com.trelloiii.cibot.dto.message;
+package com.trelloiii.cibot.dto.message.branch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trelloiii.cibot.dto.message.branch.AbstractBranch;
 import com.trelloiii.cibot.dto.pipeline.CallBackUtils;
 import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
 import com.trelloiii.cibot.model.Pipeline;
@@ -9,76 +9,74 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Component
-public class MessagesFork extends AbstractFork {
+public class MessageBranch extends AbstractBranch {
     private final PipelineService pipelineService;
-    private final ObjectMapper objectMapper;
     private final CallBackUtils callbackUtils;
     @Autowired
-    public MessagesFork(PipelineService pipelineService, ObjectMapper objectMapper,CallBackUtils callbackUtils) {
+    public MessageBranch(PipelineService pipelineService, CallBackUtils callbackUtils) {
         this.pipelineService = pipelineService;
-        this.objectMapper = objectMapper;
         this.callbackUtils = callbackUtils;
     }
 
     @Override
-    public List<SendMessage> process(String message, String chatId) {
-        switch (message){
+    public void process(Message message,Consumer<SendMessage> sendMessage) {
+        String chatId=message.getChatId().toString();
+        String messageText=message.getText();
+        switch (messageText){
             case "Create pipeline":
-                return Collections.singletonList(createPipeline(chatId));
+                sendMessage.accept(createPipeline(chatId));
+                break;
             case "show my pipelines":
-                return showPipelines(chatId);
+                showPipelines(chatId,sendMessage);
+                break;
             case "main":
             case "start":
             default:
-                return mainProcess(chatId,"What can I help you?");
+                sendMessage.accept(mainProcess(message.getChatId(),"What can I help you?"));
         }
     }
 
     @Override
-    public List<SendMessage> processCallback(String message, String data, String chatId, Consumer<SendMessage> sendMessageConsumer) {
-        switch (message){
+    public void processCallback(Message message, String[] data,Consumer<SendMessage> sendMessage) {
+        String messageText=data[0];
+        String pipelineId=data[1];
+        Long chatId=message.getChatId();
+        switch (messageText){
             case "start":
-                return callbackUtils.startPipeline(data, chatId, sendMessageConsumer);
+                callbackUtils.startPipeline(pipelineId, chatId, sendMessage);
+                break;
             case "history":
-                return callbackUtils.getHistory(data,chatId);
+                callbackUtils.getHistory(pipelineId,chatId,sendMessage);
+                break;
             case "delete":
             default:
-                return Collections.singletonList(
-                        new SendMessage(
-                                chatId,
-                                "delete"
-                        )
-                );
+                sendMessage.accept(new SendMessage(chatId, "delete"));
         }
     }
 
-    private List<SendMessage> showPipelines(String chatId) {
+    private void showPipelines(String chatId, Consumer<SendMessage> sendMessage) {
         List<Pipeline> pipelineList=pipelineService.getPipelines();
-        List<SendMessage> result=new ArrayList<>();
-        for(Pipeline pipeline:pipelineList){
-            SendMessage sendMessage=
-                    new SendMessage(
-                            chatId,
-                            String.format(
-                                    "%s: [repository: %s , token: %s]",
-                                    pipeline.getName(),
-                                    pipeline.getRepositoryName(),
-                                    pipeline.getOauthToken()
-                            )
-                    );
-            pipelineInline(sendMessage,pipeline);
-            result.add(sendMessage);
-        }
-        return result;
+        pipelineList.forEach(pipeline -> {
+            SendMessage message = new SendMessage(
+                    chatId,
+                    String.format(
+                            "%s: [repository: %s , token: %s]",
+                            pipeline.getName(),
+                            pipeline.getRepositoryName(),
+                            pipeline.getOauthToken()
+                    )
+            );
+            pipelineInline(message,pipeline);
+            sendMessage.accept(message);
+        });
     }
 
     @SneakyThrows

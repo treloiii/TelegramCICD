@@ -1,74 +1,50 @@
 package com.trelloiii.cibot;
 
-import com.trelloiii.cibot.dto.message.ForkProcessor;
-import com.trelloiii.cibot.dto.pipeline.LoggablePipeline;
-import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
-import com.trelloiii.cibot.service.PipelineService;
-import com.trelloiii.cibot.model.Pipeline;
-import com.trelloiii.cibot.service.UserService;
+import com.trelloiii.cibot.dto.message.events.CallbackEventEventListener;
+import com.trelloiii.cibot.dto.message.MessageDistributor;
+import com.trelloiii.cibot.dto.message.events.MessageEventListener;
 import lombok.SneakyThrows;
-import lombok.val;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.function.*;
+import java.util.stream.Stream;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
-    private final UserService userService;
-    @Value("${github.token}")
-    private String token;
     @Value("${bot.token}")
     private String botToken;
-    private final PipelineService pipelineService;
-    private PipelineFactory pipelineFactory = null;
-    private final ForkProcessor forkProcessor;
+    private final MessageDistributor messageDistributor;
 
     @Autowired
-    public Bot(UserService userService, PipelineService pipelineService, ForkProcessor forkProcessor) {
-        this.userService = userService;
-        this.pipelineService = pipelineService;
-        this.forkProcessor = forkProcessor;
+    public Bot(MessageDistributor messageDistributor, BeanFactory beanFactory) {
+        this.messageDistributor = messageDistributor;
+        Consumer<SendMessage> consumer = sendMessage -> {
+            try {
+                execute(sendMessage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        Stream.of(
+                beanFactory.getBean(MessageEventListener.class,consumer),
+                beanFactory.getBean(CallbackEventEventListener.class,consumer)
+        ).forEach(eventListener -> messageDistributor.subscribe(eventListener.getType(),eventListener));
     }
-
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         System.out.println("new message!");
-        List<SendMessage> sendMessage;
-        if (update.hasCallbackQuery())
-            sendMessage = forkProcessor.processCallBack(update.getCallbackQuery(),sm -> {
-                try {
-                    execute(sm);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-            });
+        if(update.hasCallbackQuery())
+            messageDistributor.processCallback(update);
         else
-            sendMessage = forkProcessor.processMessage(update.getMessage());
-        for (SendMessage message : sendMessage) {
-            execute(message);
-        }
-
-
-//        User user = update.getMessage().getFrom();
-//        if (!userService.checkIfExists(user)) {
-//            userService.saveUser(user);
-//            //TODO переделать логгер сервис
-//        } else {
-
-//        }
+            messageDistributor.processMessage(update);
     }
-
-
-
 
     @Override
     public String getBotUsername() {

@@ -7,12 +7,10 @@ import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.service.PipelineHistoryService;
 import com.trelloiii.cibot.service.PipelineService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 @Component
@@ -26,7 +24,7 @@ public class CallBackUtils {
         this.pipelineService = pipelineService;
     }
 
-    public List<SendMessage> startPipeline(String data, String chatId, Consumer<SendMessage> sendMessageConsumer) {
+    public void startPipeline(String data, Long chatId, Consumer<SendMessage> sendMessageConsumer) {
         Pipeline pipeline=pipelineService.getPipeline(data);
         VCSCloner vcsCloner=new VCSCloner(pipeline.getOauthToken(),pipeline.getRepositoryName());
         vcsCloner.cloneRepos();
@@ -35,25 +33,20 @@ public class CallBackUtils {
         PipelineYamlParser parser = new PipelineYamlParser(pipeline);
         try {
             pipeline = parser.parse();
+            pipelineService.execute(generateLoggable(chatId.toString(), pipeline,sendMessageConsumer));
+            sendMessageConsumer.accept(new SendMessage(chatId, String.format("Pipeline with id %s started!", data)));
         }
         catch (BuildFileNotFoundException | EnvironmentNotFoundException e){
             vcsCloner.removeRepos();
-            return Collections.singletonList(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
+            sendMessageConsumer.accept(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
         }
-        pipelineService.execute(generateLoggable(chatId, pipeline,sendMessageConsumer));
-        return Collections.singletonList(
-                new SendMessage(
-                        chatId,
-                        String.format("Pipeline with id %s started!", data)
-                )
-        );
     }
-    public List<SendMessage> getHistory(String data,String chatId){
-        Pipeline pipeline=pipelineService.getPipeline(data);
+    public void getHistory(String pipelineId, Long chatId, Consumer<SendMessage> sendMessage){
+        Pipeline pipeline=pipelineService.getPipeline(pipelineId);
         List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipeline(pipeline);
-        SendMessage sendMessage=new SendMessage();
-        sendMessage.enableMarkdown(true);
-        sendMessage.setChatId(chatId);
+        SendMessage message=new SendMessage();
+        message.enableMarkdown(true);
+        message.setChatId(chatId);
         String head=String.format("_history of %s_",pipeline.getName());
         if(pipelineHistory.size()>0) {
             String tableHat=String.join(" | ",
@@ -61,10 +54,10 @@ public class CallBackUtils {
                     fixedString("Status"," "),
                     fixedString("Failed stage"," "),
                     fixedString("Failed command"," "));
-            String tableDelimeter=fixedString("","-");
+            String tableDelimiter=fixedString("","-");
             StringBuilder stringBuilder=new StringBuilder();
             stringBuilder.append(head).append("\n");
-            stringBuilder.append(tableHat).append("\n").append(tableDelimeter).append("\n");
+            stringBuilder.append(tableHat).append("\n").append(tableDelimiter).append("\n");
             for(PipelineHistory history:pipelineHistory){
                 stringBuilder.append(String.join(
                         " | ",
@@ -75,12 +68,12 @@ public class CallBackUtils {
                 ))
                         .append("\n");
             }
-            sendMessage.setText(stringBuilder.toString());
+            message.setText(stringBuilder.toString());
         }
         else{
-            sendMessage.setText(head+"\n"+"*EMPTY*");
+            message.setText(head+"\n"+"*EMPTY*");
         }
-        return Collections.singletonList(sendMessage);
+        sendMessage.accept(message);
     }
     private LoggablePipeline generateLoggable(String chatId, Pipeline pipeline, Consumer<SendMessage> sendMessageConsumer) {
         LoggablePipeline loggablePipeline = new LoggablePipeline();
