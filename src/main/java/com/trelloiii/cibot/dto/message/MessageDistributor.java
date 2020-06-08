@@ -18,10 +18,10 @@ public class MessageDistributor {
     }
 
     public void processMessage(Update update) {
-        this.eventManager.call("message", update);
+        new Thread(()-> this.eventManager.call("message", update)).start();
     }
 
     public void processCallback(Update update) {
-        this.eventManager.call("callback", update);
+        new Thread(()->this.eventManager.call("callback", update)).start();
     }
 }

@@ -3,7 +3,6 @@ package com.trelloiii.cibot.dto.message.events;
 import com.trelloiii.cibot.dto.message.branch.ActivationBranch;
 import com.trelloiii.cibot.dto.message.branch.FactoryBranch;
 import com.trelloiii.cibot.dto.message.branch.MessageBranch;
-import com.trelloiii.cibot.dto.message.events.EventListener;
 import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
 import com.trelloiii.cibot.service.UserService;
 import lombok.Getter;
@@ -25,11 +24,11 @@ public class MessageEventListener implements EventListener {
     @Autowired
     private UserService userService;
     @Autowired
-    private FactoryBranch factoryFork;
+    private FactoryBranch factoryBranch;
     @Autowired
-    private MessageBranch messagesFork;
+    private MessageBranch messageBranch;
     @Autowired
-    private ActivationBranch activationFork;
+    private ActivationBranch activationBranch;
 
     @Override
     public void listen(Update update) {
@@ -37,12 +36,12 @@ public class MessageEventListener implements EventListener {
         User from = update.getMessage().getFrom();
         if (userService.checkIfExists(from)) {
             if (!PipelineFactory.haveInstance()) {
-                factoryFork.process(message,sendMessageConsumer);
+                factoryBranch.process(message,sendMessageConsumer);
             } else {
-                messagesFork.process(message,sendMessageConsumer);
+                messageBranch.process(message,sendMessageConsumer);
             }
         } else {//либо пользователь не существует либо рут не активен
-            activationFork.process(message,sendMessageConsumer);
+            activationBranch.process(message,sendMessageConsumer);
         }
     }
 }

@@ -29,7 +29,6 @@ public class UserService {
     }
     public User saveUser(org.telegram.telegrambots.meta.api.objects.User user){
         Root root=rootRepository.findAll().get(0);
-        root.setActivated(true);
         rootRepository.save(root);
         return userRepository.save(mapFromTelegram(user));
     }
