@@ -5,6 +5,7 @@ import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
 import lombok.*;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
+import org.zeroturnaround.exec.stream.LogOutputStream;
 
 import java.io.*;
 import java.util.stream.Stream;
@@ -35,11 +36,21 @@ public class NativeUnixInstruction implements Instruction {
         try {
             ProcessResult res=new ProcessExecutor(text.split(" "))
                     .directory(new File(directory))
-                    .readOutput(true)
+                    .redirectError(new LogOutputStream() {
+                        @Override
+                        protected void processLine(String s) {
+                            readLog(s,logExecutor,true);
+                        }
+                    })
+                    .redirectOutput(new LogOutputStream() {
+                        @Override
+                        protected void processLine(String s) {
+                           readLog(s,logExecutor,false);
+                        }
+                    })
                     .execute();
             int code=res.getExitValue();
             status = code == 0;
-            readLog(res.getOutput().getLines(),logExecutor,!status);
             if(ignoreOnExit){
                 status=true;
                 code=0;
