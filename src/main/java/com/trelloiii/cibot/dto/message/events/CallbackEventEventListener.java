@@ -20,14 +20,14 @@ public class CallbackEventEventListener implements EventListener {
     @Getter
     private final String type="callback";
     @Autowired
-    private MessageBranch messagesFork;
+    private MessageBranch messageBranch;
 
     @Override
     public void listen(Update entity) {
         CallbackQuery callbackQuery=entity.getCallbackQuery();
         String[] dataAndPath=callbackQuery.getData().split("&");
         if (dataAndPath[0].equals("msg")) {
-            messagesFork.processCallback(callbackQuery.getMessage(), Arrays.copyOfRange(dataAndPath,1,3),sendMessageConsumer);
+            messageBranch.processCallback(callbackQuery.getMessage(), Arrays.copyOfRange(dataAndPath,1,3),sendMessageConsumer);
         }
     }
 }

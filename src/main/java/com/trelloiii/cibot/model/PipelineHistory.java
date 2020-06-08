@@ -18,4 +18,5 @@ public class PipelineHistory {
     private Boolean status;
     private String failed_stage;
     private String failed_instruction;
+    private String logPath;
 }

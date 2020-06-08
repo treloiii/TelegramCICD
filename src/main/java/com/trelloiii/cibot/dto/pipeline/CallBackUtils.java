@@ -1,8 +1,7 @@
 package com.trelloiii.cibot.dto.pipeline;
 
 import com.trelloiii.cibot.dto.vcs.VCSCloner;
-import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
-import com.trelloiii.cibot.exceptions.EnvironmentNotFoundException;
+import com.trelloiii.cibot.exceptions.*;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.service.PipelineHistoryService;
@@ -12,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 @Component
 public class CallBackUtils {
@@ -25,19 +25,25 @@ public class CallBackUtils {
     }
 
     public void startPipeline(String data, Long chatId, Consumer<SendMessage> sendMessageConsumer) {
-        Pipeline pipeline=pipelineService.getPipeline(data);
-        VCSCloner vcsCloner=new VCSCloner(pipeline.getOauthToken(),pipeline.getRepositoryName());
-        vcsCloner.cloneRepos();
+       VCSCloner vcsCloner=null;
+        try {
+            Pipeline pipeline = pipelineService.getPipeline(data);
+            vcsCloner = new VCSCloner(pipeline.getOauthToken(), pipeline.getRepositoryName());
+            vcsCloner.cloneRepos();
         //^parse vcs
 
-        PipelineYamlParser parser = new PipelineYamlParser(pipeline);
-        try {
+            PipelineYamlParser parser = new PipelineYamlParser(pipeline);
+
             pipeline = parser.parse();
             pipelineService.execute(generateLoggable(chatId.toString(), pipeline,sendMessageConsumer));
             sendMessageConsumer.accept(new SendMessage(chatId, String.format("Pipeline with id %s started!", data)));
         }
-        catch (BuildFileNotFoundException | EnvironmentNotFoundException e){
-            vcsCloner.removeRepos();
+        catch (PipelineNotFoundException e){
+            sendMessageConsumer.accept(new SendMessage(chatId,"This pipeline not found"));
+        }
+        catch (BuildFileNotFoundException | EnvironmentNotFoundException | GithubAuthException | GithubRepositoryNotFoundException e){
+            if(vcsCloner!=null)
+                vcsCloner.removeRepos();
             sendMessageConsumer.accept(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
         }
     }

@@ -34,7 +34,7 @@ public class PipelineExecutor {
         while (true) {
             LoggablePipeline loggablePipeline = pipelineQueue.take();
             Pipeline pipeline = loggablePipeline.getPipeline();
-            LogExecutor logExecutor = new LogExecutor(loggablePipeline.getSendMessageConsumer(), loggablePipeline.getId());
+            LogExecutor logExecutor = new LogExecutor(loggablePipeline.getSendMessageConsumer(), loggablePipeline.getId(),loggablePipeline.getPipeline());
             List<Stage> stageList = pipeline.getStages();
             Stage failed = null;
             for (Stage stage : stageList) {

@@ -1,9 +1,12 @@
 package com.trelloiii.cibot.dto.vcs;
 
 import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
+import com.trelloiii.cibot.exceptions.GithubAuthException;
+import com.trelloiii.cibot.exceptions.GithubRepositoryNotFoundException;
 import lombok.val;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.HttpException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -31,7 +34,14 @@ public class VCSCloner {
                 System.out.println(line);
             }
             System.out.println(res);
-        } catch (Exception e) {
+        }
+        catch (HttpException e){
+            throw new GithubAuthException();
+        }
+        catch (NullPointerException e){
+            throw new GithubRepositoryNotFoundException();
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 

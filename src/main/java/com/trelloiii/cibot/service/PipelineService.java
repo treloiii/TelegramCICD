@@ -2,6 +2,7 @@ package com.trelloiii.cibot.service;
 
 import com.trelloiii.cibot.dto.pipeline.LoggablePipeline;
 import com.trelloiii.cibot.dto.pipeline.PipelineExecutor;
+import com.trelloiii.cibot.exceptions.PipelineNotFoundException;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.repository.PipelineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,12 @@ public class PipelineService {
     public Pipeline savePipeline(Pipeline pipeline){
         return pipelineRepository.save(pipeline);
     }
+    public void removePipeline(Pipeline pipeline){
+        pipelineRepository.delete(pipeline);
+    }
+    public void removePipeline(Long id){
+        pipelineRepository.deleteById(id);
+    }
 
     public List<Pipeline> getPipelines() {
         return pipelineRepository.findAll();
@@ -46,6 +53,6 @@ public class PipelineService {
 
     public Pipeline getPipeline(String data) {
         return pipelineRepository.findById(Long.valueOf(data))
-                .orElseThrow(()->new RuntimeException("pipeline not found"));
+                .orElseThrow(()->new PipelineNotFoundException("pipeline not found"));
     }
 }

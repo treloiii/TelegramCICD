@@ -26,9 +26,9 @@ public class LoggerUtils {
         try {
             if (!output.isEmpty()) {
                 if (!isError)
-                    logExecutor.sendLog(String.format("*[LOG]*: `%s`", output));
+                    logExecutor.sendLog(String.format("*[LOG]*: `%s`", output),output);
                 else
-                    logExecutor.sendLog(String.format("*[ERROR]*: `%s`", output));
+                    logExecutor.sendLog(String.format("*[ERROR]*: `%s`", output),output);
             }
         } catch (Exception e) {
             e.printStackTrace();

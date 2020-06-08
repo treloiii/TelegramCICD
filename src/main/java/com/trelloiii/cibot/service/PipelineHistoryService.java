@@ -26,6 +26,7 @@ public class PipelineHistoryService {
         history.setExecutedAt(LocalDateTime.now());
         history.setPipeline(pipeline);
         history.setStatus(false);
+        history.setLogPath(pipeline.getLogPath());
         if(failedStage!=null) {
             history.setFailed_stage(failedStage.getName());
             Instruction failedNativeUnixInstruction = failedStage.getInstructions()

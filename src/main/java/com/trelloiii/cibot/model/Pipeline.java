@@ -17,9 +17,10 @@ public class Pipeline {
     private String name;
     private String repositoryName;
     private String oauthToken;
+    @Transient
+    private String logPath;
 
-
-    @OneToMany(mappedBy = "pipeline")
+    @OneToMany(mappedBy = "pipeline",orphanRemoval = true)
     private List<PipelineHistory> history;
 
     @Transient

@@ -22,4 +22,5 @@ public class MainConfiguration {
     public CallbackEventEventListener callbackEventEventListener(Consumer<SendMessage> sendMessageConsumer){
         return new CallbackEventEventListener(sendMessageConsumer);
     }
+
 }

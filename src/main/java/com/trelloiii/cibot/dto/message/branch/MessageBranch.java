@@ -57,6 +57,7 @@ public class MessageBranch extends AbstractBranch {
                 callbackUtils.getHistory(pipelineId,chatId,sendMessage);
                 break;
             case "delete":
+                pipelineService.removePipeline(Long.valueOf(pipelineId));
             default:
                 sendMessage.accept(new SendMessage(chatId, "delete"));
         }

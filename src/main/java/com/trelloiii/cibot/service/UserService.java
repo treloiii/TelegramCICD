@@ -21,6 +21,7 @@ public class UserService {
     public UserService(UserRepository userRepository, RootRepository rootRepository) {
         this.userRepository = userRepository;
         this.rootRepository = rootRepository;
+        firstStartup();
     }
 
     public User saveUser(User user){
@@ -66,5 +67,21 @@ public class UserService {
             e.printStackTrace();
         }
         rootRepository.save(root);
+    }
+    public void firstStartup(){
+        if(rootRepository.findAll().isEmpty()){
+            Root root=new Root();
+            root.setId(UUID.randomUUID().toString());
+            root.setPassword(UUID.randomUUID().toString());
+            root.setActivated(false);
+            rootRepository.save(root);
+            File file=new File("./root_password");
+            try(FileWriter fileWriter=new FileWriter(file)){
+                fileWriter.write(root.getPassword());
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
     }
 }
