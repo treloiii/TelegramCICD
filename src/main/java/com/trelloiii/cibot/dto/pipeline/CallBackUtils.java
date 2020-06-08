@@ -99,4 +99,8 @@ public class CallBackUtils {
         }
         return sb.toString();
     }
+
+    public void redactPipeline(String pipelineId, Long chatId, Consumer<SendMessage> sendMessage) {
+
+    }
 }
