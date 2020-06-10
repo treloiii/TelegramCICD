@@ -23,31 +23,31 @@ public class FactoryBranch extends AbstractBranch {
     }
 
     @Override
-    public void process(Message message, Consumer<SendMessage> sendMessage) {
+    public void process(Message message) {
         String messageText=message.getText();
         Long chatId=message.getChatId();
         switch (messageText) {
             case "One stage back <--":
-                stageBack(chatId,sendMessage);
+                stageBack(chatId);
                 break;
-            case "main":
+            case "Cancel":
                 PipelineFactory.nullFactory();
-                mainProcess(chatId, "What can I help???");
+                send(mainProcess(chatId, "What can I help???"));
                 break;
             default:
-                queueProcess(message,sendMessage);
+                queueProcess(message);
         }
     }
 
-    private void stageBack(Long chatId,Consumer<SendMessage> sendMessage) {
+    private void stageBack(Long chatId) {
         if (pipelineFactory.backStep()) {
             PipelineFactory.nullFactory();
-            sendMessage.accept(mainProcess(chatId, "Something else?"));
+            send(mainProcess(chatId, "Something else?"));
         }
-        sendMessage.accept(factoryStep(chatId));
+        send(factoryStep(chatId));
     }
 
-    private void queueProcess(Message tmMessage,Consumer<SendMessage> sendMessage) {
+    private void queueProcess(Message tmMessage) {
         this.pipelineFactory = PipelineFactory.getInstance();
         boolean result = pipelineFactory.addStep(tmMessage.getText());
         Long chatId=tmMessage.getChatId();
@@ -79,12 +79,12 @@ public class FactoryBranch extends AbstractBranch {
         } else {
             message=factoryStep(chatId);
         }
-        sendMessage.accept(message);
+        send(message);
     }
 
     private SendMessage factoryStep(Long chatId) {
         SendMessage sendMessage = new SendMessage(chatId, pipelineFactory.size());
-        setOneRowButtons(sendMessage,"Main","One stage back <--");
+        setOneRowButtons(sendMessage,"Cancel","One stage back <--");
         return sendMessage;
     }
 }

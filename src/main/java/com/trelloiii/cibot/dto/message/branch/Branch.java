@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public interface Branch {
-    void process(Message message,Consumer<SendMessage> sendMessage);
-    default void processCallback(Message message, String[] data, Consumer<SendMessage> sendMessage){
+    void process(Message message);
+    default void processCallback(Message message, String[] data){
         throw new UnsupportedOperationException("This operation is unsupported");
     }
 }

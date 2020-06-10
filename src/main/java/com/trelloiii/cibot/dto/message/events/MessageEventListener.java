@@ -12,13 +12,11 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import javax.annotation.PostConstruct;
 import java.util.function.Consumer;
 
 public class MessageEventListener implements EventListener {
     private final Consumer<SendMessage> sendMessageConsumer;
-    public MessageEventListener(Consumer<SendMessage> sendMessageConsumer) {
-        this.sendMessageConsumer = sendMessageConsumer;
-    }
     @Getter
     private final String type="message";
     @Autowired
@@ -29,6 +27,15 @@ public class MessageEventListener implements EventListener {
     private MessageBranch messageBranch;
     @Autowired
     private ActivationBranch activationBranch;
+    public MessageEventListener(Consumer<SendMessage> sendMessageConsumer) {
+        this.sendMessageConsumer = sendMessageConsumer;
+    }
+    @PostConstruct
+    public void initBranches(){
+        factoryBranch.setSendMessageConsumer(sendMessageConsumer);
+        messageBranch.setSendMessageConsumer(sendMessageConsumer);
+        activationBranch.setSendMessageConsumer(sendMessageConsumer);
+    }
 
     @Override
     public void listen(Update update) {
@@ -36,12 +43,12 @@ public class MessageEventListener implements EventListener {
         User from = update.getMessage().getFrom();
         if (userService.checkIfExists(from)) {
             if (!PipelineFactory.haveInstance()) {
-                factoryBranch.process(message,sendMessageConsumer);
+                factoryBranch.process(message);
             } else {
-                messageBranch.process(message,sendMessageConsumer);
+                messageBranch.process(message);
             }
         } else {//либо пользователь не существует либо рут не активен
-            activationBranch.process(message,sendMessageConsumer);
+            activationBranch.process(message);
         }
     }
 }

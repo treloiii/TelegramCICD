@@ -17,7 +17,7 @@ public class ActivationBranch extends AbstractBranch {
     }
 
     @Override
-    public void process(Message incoming, Consumer<SendMessage> sendMessage) {
+    public void process(Message incoming) {
         String text=incoming.getText();
         Long chatId=incoming.getChatId();
         Root root = userService.getRoot();
@@ -42,6 +42,6 @@ public class ActivationBranch extends AbstractBranch {
                 setOneRowButtons(message, "generate new password");
             }
         }
-        sendMessage.accept(message);
+        send(message);
     }
 }

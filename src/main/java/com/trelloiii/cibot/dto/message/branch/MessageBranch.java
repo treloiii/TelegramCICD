@@ -32,25 +32,27 @@ public class MessageBranch extends AbstractBranch {
     }
 
     @Override
-    public void process(Message message, Consumer<SendMessage> sendMessage) {
+    public void process(Message message) {
         String chatId = message.getChatId().toString();
         String messageText = message.getText();
         switch (messageText) {
             case CREATE_PIPELINE:
-                sendMessage.accept(createPipeline(chatId));
+                send(createPipeline(chatId));
                 break;
             case SHOW_PIPELINES:
-                showPipelines(message, sendMessage);
+                showPipelines(message);
                 break;
             case HELP:
-                helpSend(chatId,sendMessage);
+                helpSend(chatId);
                 break;
+            case "jopa":
+                send(new SendMessage(chatId,"sosi"));
             default:
-                redactOrDefault(sendMessage,messageText,Long.valueOf(chatId));
+                redactOrDefault(messageText,Long.valueOf(chatId));
         }
     }
 
-    private void helpSend(String chatId, Consumer<SendMessage> sendMessage) {
+    private void helpSend(String chatId) {
         SendMessage message=new SendMessage();
         message.setChatId(chatId);
         message.enableMarkdown(true);
@@ -58,58 +60,58 @@ public class MessageBranch extends AbstractBranch {
                 "Hello its a simple *CI/CD bot*\n" +
                 "This bot can make simple builds and deployment\n"+
                 "To know full info, please [visit docs page](https://botinfo.trelloiii.site)");//TODO сменить урл если надо будет
-        sendMessage.accept(message);
+        send(message);
     }
 
-    private void redactOrDefault(Consumer<SendMessage> sendMessage, String field, Long chatId) {
+    private void redactOrDefault(String field, Long chatId) {
         if(redactor.getRedact()){
             if (redactor.checkField()) {
                 redactor.redact(field);
-                sendMessage.accept(mainProcess(chatId,"Successfully changed "+redactor.getField()));
+                send(mainProcess(chatId,"Successfully changed "+redactor.getField()));
                 redactor.clear();
             }else{
                 redactor.setField(field);
-                sendMessage.accept(new SendMessage(chatId,"Now enter new value"));
+                send(new SendMessage(chatId,"Now enter new value"));
             }
         }else {
-            sendMessage.accept(mainProcess(chatId, "What can I help you?"));
+            send(mainProcess(chatId, "What can I help you?"));
         }
     }
 
     @Override
-    public void processCallback(Message message, String[] data, Consumer<SendMessage> sendMessage) {
+    public void processCallback(Message message, String[] data) {
         String messageText = data[0];
         String pipelineId = data[1];
         Long chatId = message.getChatId();
         switch (messageText) {
             case "start":
-                callbackUtils.startPipeline(pipelineId, chatId, sendMessage);
+                callbackUtils.startPipeline(pipelineId, chatId, getSendMessageConsumer());
                 break;
             case "history":
-                callbackUtils.getHistory(pipelineId, chatId, sendMessage);
+                callbackUtils.getHistory(pipelineId, chatId, getSendMessageConsumer());
                 break;
             case "delete":
                 pipelineService.removePipeline(Long.valueOf(pipelineId));
-                sendMessage.accept(new SendMessage(chatId, "pipeline successfully deleted!"));
+                send(new SendMessage(chatId, "pipeline successfully deleted!"));
                 break;
             case "redact":
-                redactPipeline(pipelineId, chatId, sendMessage);
+                redactPipeline(pipelineId, chatId);
                 break;
             default:
-                sendMessage.accept(new SendMessage(chatId, "delete"));
+                send(new SendMessage(chatId, "delete"));
         }
     }
 
-    private void redactPipeline(String pipelineId, Long chatId, Consumer<SendMessage> sendMessage) {
+    private void redactPipeline(String pipelineId, Long chatId) {
         SendMessage message = new SendMessage(chatId, "pick what you want to change");
         message.enableMarkdown(true);
         setOneRowButtons(message, "name","repository name","token");
         redactor.setPipelineId(pipelineId);
         redactor.setRedact(true);
-        sendMessage.accept(message);
+        send(message);
     }
 
-    private void showPipelines(Message tmMessage, Consumer<SendMessage> sendMessage) {
+    private void showPipelines(Message tmMessage) {
         List<Pipeline> pipelineList = pipelineService.getPipelines();
         pipelineList.forEach(pipeline -> {
             String secured="You're not a creator of this pipeline.\nToken is hidden";
@@ -126,12 +128,12 @@ public class MessageBranch extends AbstractBranch {
                     )
             );
             pipelineInline(message, pipeline);
-            sendMessage.accept(message);
+            send(message);
         });
         if (pipelineList.isEmpty()){
             SendMessage message = new SendMessage(tmMessage.getChatId(), "*Pipeline list is empty*".toUpperCase());
             message.enableMarkdown(true);
-            sendMessage.accept(message);
+            send(message);
         }
     }
 
