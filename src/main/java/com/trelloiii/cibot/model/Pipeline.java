@@ -23,6 +23,9 @@ public class Pipeline {
 
     @OneToMany(mappedBy = "pipeline",orphanRemoval = true)
     private List<PipelineHistory> history;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User owner;
 
     @Transient
     private List<Stage> stages;

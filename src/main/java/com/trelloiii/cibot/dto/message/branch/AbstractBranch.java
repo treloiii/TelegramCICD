@@ -9,9 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractBranch implements Branch {
+    public static final String HELP="Help";
+    public static final String CREATE_PIPELINE="Create pipeline";
+    public static final String SHOW_PIPELINES="Show pipelines";
     public SendMessage mainProcess(Long chatId,String message){
         SendMessage sendMessage=new SendMessage(chatId,message);
-        setOneRowButtons(sendMessage,"Help","Create pipeline","show my pipelines");
+        setOneRowButtons(sendMessage,HELP,CREATE_PIPELINE,SHOW_PIPELINES);
         return sendMessage;
     }
     private ReplyKeyboardMarkup getKeyboardMarkup(){

@@ -12,7 +12,10 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.util.function.*;
 import java.util.stream.Stream;
 
@@ -41,6 +44,7 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         System.out.println("new message!");
+        System.out.println("new message2!");
         if(update.hasCallbackQuery())
             messageDistributor.processCallback(update);
         else

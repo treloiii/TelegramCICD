@@ -3,7 +3,13 @@ package com.trelloiii.cibot.dto.message;
 import com.trelloiii.cibot.dto.message.events.EventListener;
 import com.trelloiii.cibot.dto.message.events.EventManager;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class MessageDistributor {

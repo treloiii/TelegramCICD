@@ -28,7 +28,7 @@ public class ActivationBranch extends AbstractBranch {
             if (text.equals(root.getPassword())) {
                 userService.saveUser(incoming.getFrom());
                 message = new SendMessage(chatId, "Your bot is active now!\nWhat can I help for u?");
-                setOneRowButtons(message, "Main", "CreatePipeline");
+                setOneRowButtons(message, HELP, CREATE_PIPELINE);
             }
             else if(text.equals("generate new password")){
                 userService.generateNewRootPassword();

@@ -1,6 +1,7 @@
 package com.trelloiii.cibot.dto.pipeline;
 
 import com.trelloiii.cibot.model.Pipeline;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.Deque;
 import java.util.LinkedList;
