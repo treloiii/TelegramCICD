@@ -1,14 +1,13 @@
 package com.trelloiii.cibot.dto.pipeline.instruction;
 
-import com.trelloiii.cibot.dto.logger.LogExecutor;
-import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
+import com.trelloiii.cibot.dto.logger.AbstractLogger;
+import com.trelloiii.cibot.dto.logger.Logger;
 import lombok.*;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.stream.LogOutputStream;
 
 import java.io.*;
-import java.util.stream.Stream;
 
 import static com.trelloiii.cibot.dto.logger.LoggerUtils.readLog;
 
@@ -32,20 +31,20 @@ public class NativeUnixInstruction implements Instruction {
         this.ignoreOnExit = ignoreOnExit;
     }
 
-    public int execute(LogExecutor logExecutor) {
+    public int execute(AbstractLogger logger) {
         try {
             ProcessResult res=new ProcessExecutor(text.split(" "))
                     .directory(new File(directory))
                     .redirectError(new LogOutputStream() {
                         @Override
                         protected void processLine(String s) {
-                            readLog(s,logExecutor,true);
+                            readLog(s, logger,true);
                         }
                     })
                     .redirectOutput(new LogOutputStream() {
                         @Override
                         protected void processLine(String s) {
-                           readLog(s,logExecutor,false);
+                           readLog(s, logger,false);
                         }
                     })
                     .execute();

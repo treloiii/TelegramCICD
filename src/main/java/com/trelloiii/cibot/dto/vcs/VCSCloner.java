@@ -10,6 +10,8 @@ import org.kohsuke.github.HttpException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.stream.Stream;
 
 public class VCSCloner {
     private String token;
@@ -23,8 +25,12 @@ public class VCSCloner {
     public void cloneRepos(){
         try {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
-            val repos = gitHub.getMyself().getAllRepositories();
-            GHRepository repository = repos.get(repositoryName);
+            Map<String,GHRepository> repos = gitHub.getMyself().getAllRepositories();
+            GHRepository repository = repos.values()
+                    .stream()
+                    .filter(grp->grp.getFullName().equals(repositoryName))
+                    .findAny()
+                    .orElseThrow(NullPointerException::new);
             Process process = Runtime.getRuntime().exec(new String[]{"git", "clone", String.format("%s.git", repository.getHtmlUrl().toString())});
             int res = process.waitFor();
 

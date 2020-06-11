@@ -1,6 +1,7 @@
 package com.trelloiii.cibot.dto.pipeline.instruction;
 
-import com.trelloiii.cibot.dto.logger.LogExecutor;
+import com.trelloiii.cibot.dto.logger.AbstractLogger;
+import com.trelloiii.cibot.dto.logger.Logger;
 import lombok.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -25,17 +26,17 @@ public class CopyJavaInstruction extends JavaInstruction {
     }
 
     @Override
-    public int execute(LogExecutor logExecutor) {
+    public int execute(AbstractLogger logger) {
         try{
-            readLog(String.format("starting to copy from %s to %s",workingDir,destinationFolder),logExecutor,false);
+            readLog(String.format("starting to copy from %s to %s",workingDir,destinationFolder), logger,false);
             execute();
-            readLog("copy complete",logExecutor,false);
+            readLog("copy complete", logger,false);
             status=true;
             return 0;
         }
         catch (Exception e){
-            readLog(String.format("error while copy file %s",workingDir),logExecutor,true);
-            readLog(e.getMessage(),logExecutor,true);
+            readLog(String.format("error while copy file %s",workingDir), logger,true);
+            readLog(e.getMessage(), logger,true);
             status=false;
             return -1;
         }

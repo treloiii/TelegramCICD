@@ -1,9 +1,7 @@
 package com.trelloiii.cibot.dto.pipeline.instruction;
 
-import com.trelloiii.cibot.dto.logger.LogExecutor;
-import com.trelloiii.cibot.dto.logger.LoggerUtils;
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
+import com.trelloiii.cibot.dto.logger.AbstractLogger;
+import com.trelloiii.cibot.dto.logger.Logger;
 import org.apache.commons.io.FileUtils;
 import static com.trelloiii.cibot.dto.logger.LoggerUtils.readLog;
 import java.io.File;
@@ -15,17 +13,17 @@ public class RemoveJavaInstruction extends JavaInstruction {
         super(null, targetFile,null);
     }
     @Override
-    public int execute(LogExecutor logExecutor) {
+    public int execute(AbstractLogger logger) {
         try {
-            readLog(String.format("try to remove file %s",targetFile),logExecutor,false);
+            readLog(String.format("try to remove file %s",targetFile), logger,false);
             execute();
-            readLog(String.format("file %s successfully deleted",targetFile),logExecutor,false);
+            readLog(String.format("file %s successfully deleted",targetFile), logger,false);
             status=true;
             return 0;
         }
         catch (Exception e){
-            readLog(String.format("error while deleting file %s",targetFile),logExecutor,true);
-            readLog(e.getMessage(),logExecutor,true);
+            readLog(String.format("error while deleting file %s",targetFile), logger,true);
+            readLog(e.getMessage(), logger,true);
             status=false;
             return -1;
         }

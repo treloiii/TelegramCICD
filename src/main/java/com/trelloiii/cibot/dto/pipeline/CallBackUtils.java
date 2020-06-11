@@ -47,6 +47,16 @@ public class CallBackUtils {
             sendMessageConsumer.accept(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
         }
     }
+    public void startPipelineQuiet(String reposName){
+        VCSCloner vcsCloner=null;
+        try{
+            Pipeline pipeline=pipelineService.getPipelineByReposName(reposName);
+
+        }
+        catch (Exception e){
+
+        }
+    }
     public void getHistory(String pipelineId, Long chatId, Consumer<SendMessage> sendMessage){
         Pipeline pipeline=pipelineService.getPipeline(pipelineId);
         List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipeline(pipeline);
@@ -86,6 +96,7 @@ public class CallBackUtils {
         loggablePipeline.setId(chatId);
         loggablePipeline.setPipeline(pipeline);
         loggablePipeline.setSendMessageConsumer(sendMessageConsumer);
+        loggablePipeline.initLogger();
         return loggablePipeline;
     }
     private String fixedString(String s,String joiner){

@@ -55,4 +55,7 @@ public class PipelineService {
         return pipelineRepository.findById(Long.valueOf(data))
                 .orElseThrow(()->new PipelineNotFoundException("pipeline not found"));
     }
+    public Pipeline getPipelineByReposName(String reposName){
+        return pipelineRepository.findByRepositoryName(reposName);
+    }
 }

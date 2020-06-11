@@ -1,6 +1,7 @@
 package com.trelloiii.cibot.dto.pipeline;
 
-import com.trelloiii.cibot.dto.logger.LogExecutor;
+import com.trelloiii.cibot.dto.logger.AbstractLogger;
+import com.trelloiii.cibot.dto.logger.Logger;
 import com.trelloiii.cibot.dto.pipeline.instruction.Instruction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,16 +23,16 @@ public class Stage {
         instructions.forEach(Instruction::execute);
     }
     @SneakyThrows
-    public int execute(LogExecutor logExecutor) {
+    public int execute(AbstractLogger logger) {
         if (!system)
-            logExecutor.sendLog(String.format("Starting stage: %s", this.name.toUpperCase()),
+            logger.sendLog(String.format("Starting stage: %s", this.name.toUpperCase()),
                     String.format("Starting stage: %s", this.name.toUpperCase()));
         for (Instruction instruction : instructions) {
             if(system){
                 instruction.execute();
                 return 0;
             }
-            int code = instruction.execute(logExecutor);
+            int code = instruction.execute(logger);
             status = code == 0;
 
             if(code!=0)

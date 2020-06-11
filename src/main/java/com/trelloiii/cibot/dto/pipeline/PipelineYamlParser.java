@@ -27,7 +27,7 @@ public class PipelineYamlParser {
 
     public PipelineYamlParser(Pipeline pipeline) {
         this.yaml = new Yaml();
-        this.name = pipeline.getRepositoryName();
+        this.name = pipeline.getRepositoryName().split("/")[1];
         this.path = name + "/build.yaml";
         this.pipeline = pipeline;
     }

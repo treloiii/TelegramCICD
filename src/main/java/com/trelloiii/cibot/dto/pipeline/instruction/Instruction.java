@@ -1,12 +1,10 @@
 package com.trelloiii.cibot.dto.pipeline.instruction;
 
-import com.trelloiii.cibot.dto.logger.LogExecutor;
-
-import javax.naming.OperationNotSupportedException;
-import javax.ws.rs.NotSupportedException;
+import com.trelloiii.cibot.dto.logger.AbstractLogger;
+import com.trelloiii.cibot.dto.logger.Logger;
 
 public interface Instruction {
-    int execute(LogExecutor logExecutor);
+    int execute(AbstractLogger logger);
     void execute();
     default Boolean getStatus(){
         throw new UnsupportedOperationException("getStatus is unsupported");

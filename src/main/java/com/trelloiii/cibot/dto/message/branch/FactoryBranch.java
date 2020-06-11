@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-import java.util.function.Consumer;
-
 @Component
 public class FactoryBranch extends AbstractBranch {
     private PipelineFactory pipelineFactory = PipelineFactory.getInstance();
@@ -83,7 +81,8 @@ public class FactoryBranch extends AbstractBranch {
     }
 
     private SendMessage factoryStep(Long chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, pipelineFactory.size());
+        SendMessage sendMessage = new SendMessage(chatId, pipelineFactory.sizeCase());
+        sendMessage.enableMarkdown(true);
         setOneRowButtons(sendMessage,"Cancel","One stage back <--");
         return sendMessage;
     }

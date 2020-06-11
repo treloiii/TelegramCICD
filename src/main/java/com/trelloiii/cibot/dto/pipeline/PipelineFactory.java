@@ -37,14 +37,14 @@ public class PipelineFactory {
         steps.pollLast();
         return false;
     }
-    public String size(){
+    public String sizeCase(){
         switch (steps.size()){
             case 0:
                 return "Enter pipeline name";
             case 1:
-                return "Enter repository name";
+                return "Enter repository name\n*Name must be defined in form username/repository*";
             case 2:
-                return "Enter oauth token";
+                return "Enter oauth token\n [more info about oauth token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line)";
             default:
                 return "Error";
         }
