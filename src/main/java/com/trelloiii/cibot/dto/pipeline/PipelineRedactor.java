@@ -43,6 +43,8 @@ public class PipelineRedactor {
             case "token":
                 pipeline.setOauthToken(value);
                 break;
+            case "vcs branch":
+                pipeline.setBranch(value);
         }
         pipelineService.savePipeline(pipeline);
     }

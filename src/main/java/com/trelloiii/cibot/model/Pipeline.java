@@ -18,6 +18,7 @@ public class Pipeline {
     @Column(unique = true)
     private String repositoryName;
     private String oauthToken;
+    private String branch;
     @Transient
     private String logPath;
 

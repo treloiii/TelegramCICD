@@ -21,7 +21,7 @@ public class PipelineExecutor {
         this.pipelineHistoryService = pipelineHistoryService;
     }
 
-    public void addPipeline(LoggablePipeline pipeline) throws InterruptedException {
+    public void addPipeline(ExecutablePipeline pipeline) throws InterruptedException {
         pipelineQueue.put(pipeline);
     }
 

@@ -1,5 +1,7 @@
 package com.trelloiii.cibot.dto.pipeline;
 
+import com.trelloiii.cibot.dto.logger.QuietLogger;
+import com.trelloiii.cibot.dto.vcs.GithubHook;
 import com.trelloiii.cibot.dto.vcs.VCSCloner;
 import com.trelloiii.cibot.exceptions.*;
 import com.trelloiii.cibot.model.Pipeline;
@@ -47,14 +49,21 @@ public class CallBackUtils {
             sendMessageConsumer.accept(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
         }
     }
-    public void startPipelineQuiet(String reposName){
+    public void startPipelineQuiet(GithubHook hook){
         VCSCloner vcsCloner=null;
         try{
-            Pipeline pipeline=pipelineService.getPipelineByReposName(reposName);
-
+            Pipeline pipeline=pipelineService.getPipelineByReposName(hook.getRepository());
+            if(pipeline.getBranch()==null||pipeline.getBranch().equals(hook.getBranch())) {
+                vcsCloner = new VCSCloner(pipeline.getOauthToken(), pipeline.getRepositoryName());
+                vcsCloner.cloneRepos();
+                PipelineYamlParser parser = new PipelineYamlParser(pipeline);
+                pipeline = parser.parse();
+                pipelineService.execute(new QuietPipeline(pipeline, new QuietLogger(pipeline)));
+            }
         }
         catch (Exception e){
-
+            Optional.ofNullable(vcsCloner).ifPresent(VCSCloner::removeRepos);
+            e.printStackTrace();
         }
     }
     public void getHistory(String pipelineId, Long chatId, Consumer<SendMessage> sendMessage){

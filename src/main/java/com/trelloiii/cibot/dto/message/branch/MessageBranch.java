@@ -105,7 +105,7 @@ public class MessageBranch extends AbstractBranch {
     private void redactPipeline(String pipelineId, Long chatId) {
         SendMessage message = new SendMessage(chatId, "pick what you want to change");
         message.enableMarkdown(true);
-        setOneRowButtons(message, "name","repository name","token");
+        setOneRowButtons(message, "name","repository name","token","vcs branch");
         redactor.setPipelineId(pipelineId);
         redactor.setRedact(true);
         send(message);

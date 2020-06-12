@@ -1,5 +1,6 @@
 package com.trelloiii.cibot.service;
 
+import com.trelloiii.cibot.dto.pipeline.ExecutablePipeline;
 import com.trelloiii.cibot.dto.pipeline.LoggablePipeline;
 import com.trelloiii.cibot.dto.pipeline.PipelineExecutor;
 import com.trelloiii.cibot.exceptions.PipelineNotFoundException;
@@ -27,7 +28,7 @@ public class PipelineService {
         consumer.start();
     }
 
-    public void execute(LoggablePipeline pipeline){
+    public void execute(ExecutablePipeline pipeline){
         new Thread(()-> {
             try {
                 pipelineExecutor.addPipeline(pipeline);

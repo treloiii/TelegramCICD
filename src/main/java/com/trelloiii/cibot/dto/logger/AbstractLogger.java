@@ -7,6 +7,8 @@ import lombok.SneakyThrows;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public abstract class AbstractLogger {
     public final Pipeline pipeline;
@@ -27,12 +29,14 @@ public abstract class AbstractLogger {
     }
     @SneakyThrows
     public String filename() {
-        String timestamp=String.valueOf(System.currentTimeMillis());
-        String encodedTimestamp= Hashing
-                .sha256()
-                .hashString(timestamp, StandardCharsets.UTF_8)
-                .toString();
-        return String.format("log_pipeline_%s_%s_%s.log",pipeline.getId(),pipeline.getName(),encodedTimestamp);
+        LocalDateTime nowTime=LocalDateTime.now(ZoneId.systemDefault());
+        return String.format("build_log_%s_%d_%d_%d_%d_%d.log",
+                pipeline.getName(),
+                nowTime.getYear(),
+                nowTime.getMonthValue(),
+                nowTime.getDayOfMonth(),
+                nowTime.getHour(),
+                nowTime.getMinute());
     }
     public abstract void sendLog(String log,String rawLog) throws InterruptedException;
 }
