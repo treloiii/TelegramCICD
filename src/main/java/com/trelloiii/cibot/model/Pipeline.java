@@ -31,6 +31,10 @@ public class Pipeline {
     @Transient
     private List<Stage> stages;
     @Transient
+    private Stage success;
+    @Transient
+    private Stage failure;
+    @Transient
     private Map<String,Object> configuration;
 
     public Pipeline(String name, String repositoryName, String oauthToken) {

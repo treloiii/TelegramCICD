@@ -6,6 +6,7 @@ import com.trelloiii.cibot.dto.pipeline.instruction.NativeUnixInstruction;
 import com.trelloiii.cibot.dto.pipeline.instruction.RemoveJavaInstruction;
 import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
 import com.trelloiii.cibot.exceptions.EnvironmentNotFoundException;
+import com.trelloiii.cibot.exceptions.UnknownBuildOperationException;
 import com.trelloiii.cibot.model.Pipeline;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -40,6 +41,12 @@ public class PipelineYamlParser {
             pipeline.setConfiguration(pipelineConfiguration);
 
             List<Stage> stages = new ArrayList<>(parseStages(map, pipelineConfiguration));
+            Stage success=parseSuccessOrFailure(map,"success");
+            stages.add(success);
+
+
+            pipeline.setFailure(parseSuccessOrFailure(map,"failure"));
+            pipeline.setSuccess(success);
 
             if ((Boolean) pipelineConfiguration.get("delete_after"))
                 stages.add(systemAfterBuild());
@@ -52,30 +59,40 @@ public class PipelineYamlParser {
     }
 
 
+    private Stage parseSuccessOrFailure(Map<String, Object> map,String name) {
+        List<Object> sof = (List<Object>) map.get(name);
+        if(sof!=null) {
+            Stage stage = new Stage();
+            stage.setName(name);
+            stage.setSystem(false);
+            stage.setInstructions(parseInstructionsList(sof));
+            return stage;
+        }
+        return null;
+    }
     public void parseEnv(String path) throws IOException, EnvironmentNotFoundException {
-        File yaml=new File(path);
-        List<String> lines= Files.lines(yaml.toPath()).collect(Collectors.toList());
-        String content1=String.join("\n",lines);
-        Pattern pattern= Pattern.compile("%%(.*?)%%",Pattern.DOTALL);
-        Matcher matcher=pattern.matcher(content1);
-        StringBuffer result=new StringBuffer();
-        while (matcher.find()){
-            String env=matcher.group(1);
-            String replacement=System.getenv(env);
+        File yaml = new File(path);
+        List<String> lines = Files.lines(yaml.toPath()).collect(Collectors.toList());
+        String content1 = String.join("\n", lines);
+        Pattern pattern = Pattern.compile("%%(.*?)%%", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(content1);
+        StringBuffer result = new StringBuffer();
+        while (matcher.find()) {
+            String env = matcher.group(1);
+            String replacement = System.getenv(env);
             try {
                 matcher.appendReplacement(result, replacement);
-            }
-            catch (NullPointerException e){
-                throw new EnvironmentNotFoundException(String.format("Environment %s not found",env));
+            } catch (NullPointerException e) {
+                throw new EnvironmentNotFoundException(String.format("Environment %s not found", env));
             }
         }
         matcher.appendTail(result);
-        try(PrintWriter printWriter=new PrintWriter(new FileWriter(yaml))){
+        try (PrintWriter printWriter = new PrintWriter(new FileWriter(yaml))) {
             printWriter.print(result.toString());
         }
     }
 
-    public List<Stage> parseStages(Map<String, Object> map, Map<String, Object> pipelineConfiguration) {
+    public List<Stage> parseStages(Map<String, Object> map, Map<String, Object> pipelineеConfiguration) {
         List<Stage> stages = new LinkedList<>();
         Map<String, Object> parsedStages = (Map<String, Object>) map.get("stages");
 
@@ -85,31 +102,35 @@ public class PipelineYamlParser {
 
             Map<String, Object> namedInstructions = (Map<String, Object>) entry.getValue();
             List<Object> instructions = (List<Object>) namedInstructions.get("instructions");
-            List<Instruction> instructionList = new ArrayList<>();
-            for (Object inst : instructions) {
-                val instructionPair = (Map<String, Object>) inst;
-                for (Map.Entry<String, Object> instructionEntry : instructionPair.entrySet()) {
-                    String key = instructionEntry.getKey();
-                    switch (key) {
-                        case "sh":
-                            instructionList.add(new NativeUnixInstruction((String) instructionEntry.getValue(),name));
-                            break;
-                        case "ish":
-                            instructionList.add(new NativeUnixInstruction((String) instructionEntry.getValue(),name,true));
-                            break;
-                        case "copy":
-                            val copyBlock = (Map<String, Object>) instructionEntry.getValue();
-                            instructionList.add(
-                                    new CopyJavaInstruction(name, (String) copyBlock.get("target"), (String) copyBlock.get("dist"))
-                            );
-                            break;
-                    }
-                }
-            }
+            List<Instruction> instructionList = parseInstructionsList(instructions);
             stage.setInstructions(instructionList);
             stages.add(stage);
         }
         return stages;
+    }
+
+    private List<Instruction> parseInstructionsList(List<Object> instructions) {
+        return instructions
+                .stream()
+                .map(o->(Map<String, Object>) o)
+                .map(Map::entrySet)
+                .flatMap(Collection::stream)
+                .map(entry->{
+                    String key=entry.getKey();
+                    Object value=entry.getValue();
+                    switch (key) {
+                        case "sh":
+                            return new NativeUnixInstruction((String) value, name);
+                        case "ish":
+                            return new NativeUnixInstruction((String) value, name, true);
+                        case "copy":
+                            val copyBlock = (Map<String, Object>) value;
+                            return new CopyJavaInstruction(name, (String) copyBlock.get("target"), (String) copyBlock.get("dist"));
+                        default:
+                            throw new UnknownBuildOperationException(key);
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public Map<String, Object> configurationParser(Map<String, Object> map) {

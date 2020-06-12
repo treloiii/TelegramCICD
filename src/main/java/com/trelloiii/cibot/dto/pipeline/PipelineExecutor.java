@@ -1,5 +1,6 @@
 package com.trelloiii.cibot.dto.pipeline;
 
+import com.trelloiii.cibot.dto.logger.AbstractLogger;
 import com.trelloiii.cibot.dto.logger.Logger;
 import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.service.PipelineHistoryService;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -40,8 +42,10 @@ public class PipelineExecutor {
                     }
                 }
             }
-            if(failed!=null){ // system go last, if has fail on user stages whe system stages must be running anyway
-                stageList.stream()
+            boolean isBuildFailed=failed!=null;
+            if(isBuildFailed){
+                executeFinal(executablePipeline.getLogger(),pipeline.getFailure());
+                stageList.stream()  // system go last, if has fail on user stages whe system stages must be running anyway
                         .filter(Stage::getSystem)
                         .forEach(Stage::execute);
             }
@@ -51,5 +55,9 @@ public class PipelineExecutor {
 //            executablePipeline.getSendMessageConsumer().accept(finalLog);
             pipelineHistoryService.writePipelineHistory(pipeline, failed);
         }
+    }
+    private void executeFinal(AbstractLogger logger,Stage stage){
+        Optional.ofNullable(stage)
+                .ifPresent(nStage->nStage.execute(logger));
     }
 }

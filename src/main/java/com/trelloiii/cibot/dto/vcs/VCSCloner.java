@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class VCSCloner {
-    private String token;
-    private String repositoryName;
+    private final String token;
+    private final String repositoryName;
 
     public VCSCloner(String token, String repositoryName) {
         this.token = token;
