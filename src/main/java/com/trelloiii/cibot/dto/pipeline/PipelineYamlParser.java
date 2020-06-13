@@ -41,11 +41,11 @@ public class PipelineYamlParser {
             pipeline.setConfiguration(pipelineConfiguration);
 
             List<Stage> stages = new ArrayList<>(parseStages(map, pipelineConfiguration));
-            Stage success=parseSuccessOrFailure(map,"success");
+            Stage success=parseSuccessOrFailure(map,pipelineConfiguration,"success");
             stages.add(success);
 
 
-            pipeline.setFailure(parseSuccessOrFailure(map,"failure"));
+            pipeline.setFailure(parseSuccessOrFailure(map,pipelineConfiguration,"failure"));
             pipeline.setSuccess(success);
 
             if ((Boolean) pipelineConfiguration.get("delete_after"))
@@ -59,13 +59,13 @@ public class PipelineYamlParser {
     }
 
 
-    private Stage parseSuccessOrFailure(Map<String, Object> map,String name) {
+    private Stage parseSuccessOrFailure(Map<String, Object> map,Map<String,Object> configuration,String name) {
         List<Object> sof = (List<Object>) map.get(name);
         if(sof!=null) {
             Stage stage = new Stage();
             stage.setName(name);
             stage.setSystem(false);
-            stage.setInstructions(parseInstructionsList(sof));
+            stage.setInstructions(parseInstructionsList(sof,configuration));
             return stage;
         }
         return null;
@@ -102,14 +102,15 @@ public class PipelineYamlParser {
 
             Map<String, Object> namedInstructions = (Map<String, Object>) entry.getValue();
             List<Object> instructions = (List<Object>) namedInstructions.get("instructions");
-            List<Instruction> instructionList = parseInstructionsList(instructions);
+            List<Instruction> instructionList = parseInstructionsList(instructions,pipelineConfiguration);
             stage.setInstructions(instructionList);
             stages.add(stage);
         }
         return stages;
     }
 
-    private List<Instruction> parseInstructionsList(List<Object> instructions) {
+    private List<Instruction> parseInstructionsList(List<Object> instructions,Map<String,Object> pipelineConfiguration) {
+        String dir= (String) pipelineConfiguration.get("dir");
         return instructions
                 .stream()
                 .map(o->(Map<String, Object>) o)
@@ -120,12 +121,12 @@ public class PipelineYamlParser {
                     Object value=entry.getValue();
                     switch (key) {
                         case "sh":
-                            return new NativeUnixInstruction((String) value, name);
+                            return new NativeUnixInstruction((String) value, dir);
                         case "ish":
-                            return new NativeUnixInstruction((String) value, name, true);
+                            return new NativeUnixInstruction((String) value, dir, true);
                         case "copy":
                             val copyBlock = (Map<String, Object>) value;
-                            return new CopyJavaInstruction(name, (String) copyBlock.get("target"), (String) copyBlock.get("dist"));
+                            return new CopyJavaInstruction(dir, (String) copyBlock.get("target"), (String) copyBlock.get("dist"));
                         default:
                             throw new UnknownBuildOperationException(key);
                     }
