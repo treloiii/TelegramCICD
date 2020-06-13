@@ -30,8 +30,8 @@ public class VCSCloner {
                     .stream()
                     .filter(grp->grp.getFullName().equals(repositoryName))
                     .findAny()
-                    .orElseThrow(NullPointerException::new);
-            Process process = Runtime.getRuntime().exec(new String[]{"git", "clone", String.format("%s.git", repository.getHtmlUrl().toString())});
+                    .orElseThrow(NullPointerException::new);                        //https://<Token>@github.com/user/repo.git
+            Process process = Runtime.getRuntime().exec(new String[]{"git", "clone", String.format("https://%s@github.com/%s.git",token, repository.getFullName())});
             int res = process.waitFor();
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
