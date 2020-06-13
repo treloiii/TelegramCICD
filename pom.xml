@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.trelloiii</groupId>
     <artifactId>ci-bot</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>ci-bot</name>
     <description>Telegram bot that represents CI/CD platform</description>
 
