@@ -92,7 +92,7 @@ public class PipelineYamlParser {
         }
     }
 
-    public List<Stage> parseStages(Map<String, Object> map, Map<String, Object> pipelineеConfiguration) {
+    public List<Stage> parseStages(Map<String, Object> map, Map<String, Object> pipelineConfiguration) {
         List<Stage> stages = new LinkedList<>();
         Map<String, Object> parsedStages = (Map<String, Object>) map.get("stages");
 
@@ -139,6 +139,7 @@ public class PipelineYamlParser {
             res = new LinkedHashMap<>();
         }
         res.putIfAbsent("delete_after", true);
+        res.putIfAbsent("dir",name);
         return res;
     }
 
