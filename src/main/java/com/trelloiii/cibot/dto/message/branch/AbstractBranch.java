@@ -26,6 +26,7 @@ public abstract class AbstractBranch implements Branch {
 
     public SendMessage mainProcess(Long chatId, String message){
         SendMessage sendMessage=new SendMessage(chatId,message);
+        sendMessage.enableMarkdown(true);
         setOneRowButtons(sendMessage,HELP,CREATE_PIPELINE,SHOW_PIPELINES);
         return sendMessage;
     }

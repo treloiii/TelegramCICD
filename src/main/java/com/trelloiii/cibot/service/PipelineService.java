@@ -55,8 +55,12 @@ public class PipelineService {
                 lastWatcher.cancel();
                 checkTimer.purge();
             }
-            lastWatcher=beanFactory.getBean(VCSWatcher.class,pipeline);
-            checkTimer.scheduleAtFixedRate(lastWatcher, 0, pipeline.getTimer());
+            if(pipeline.getTimer()<0){ //delete timer
+                pipeline.setTimer(null);
+            }else {
+                lastWatcher = beanFactory.getBean(VCSWatcher.class, pipeline);
+                checkTimer.scheduleAtFixedRate(lastWatcher, 0, pipeline.getTimer());
+            }
         }
         return pipelineRepository.save(pipeline);
     }

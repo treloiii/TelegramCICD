@@ -65,22 +65,26 @@ public class MessageBranch extends AbstractBranch {
     }
 
     private void redactOrDefault(String field, Long chatId) {
-        if (redactor.getRedact()) { //if redact mod on
-            if (redactor.checkField()) { //if user already pick field
-                redactor.redact(field);
-                send(mainProcess(chatId, "Successfully changed " + redactor.getField()));
-                redactor.clear();
-            } else { //if user dont pick value
-                if(names.contains(field)) { //if user send correct field name
-                    redactor.setField(field);
-                    send(new SendMessage(chatId, "Now enter new value"));
+        try {
+            if (redactor.getRedact()) { //if redact mod on
+                if (redactor.checkField()) { //if user already pick field
+                    redactor.redact(field);
+                    send(mainProcess(chatId, "Successfully changed " + redactor.getField()));
+                    redactor.clear();
+                } else { //if user dont pick value
+                    if (names.contains(field)) { //if user send correct field name
+                        redactor.setField(field);
+                        send(new SendMessage(chatId, "Now enter new value"));
+                    } else { //if user send incorrect field name
+                        send(mainProcess(chatId, "*Wrong value*"));
+                    }
                 }
-                else{ //if user send incorrect field name
-                    send(mainProcess(chatId, "Wrong value"));
-                }
+            } else { //if redact mod off
+                send(mainProcess(chatId, "What can I help you?"));
             }
-        } else { //if redact mod off
-            send(mainProcess(chatId, "What can I help you?"));
+        }
+        catch (NumberFormatException e){
+            send(mainProcess(chatId,"*Wrong number format for timer.Please verify what you pass integer number*"));
         }
     }
 
