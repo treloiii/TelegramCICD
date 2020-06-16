@@ -1,0 +1,30 @@
+version: '3'
+services:
+  db:
+    image: mysql:8.0.20
+    container_name: mysql-bot
+    ports:
+     - 3306:3306
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ci_bot
+      MYSQL_ROOT_PASSWORD: root
+  bot:
+    image: trelloiii/ci-bot
+    container_name: ci-bot
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      BOT_TOKEN: 1294893988:AAGxrVpeRm9S18ByqI2CaPcferTUl0L31yk
+      PORT: 8888
+    ports:
+     - 8888:8888
+    volumes:
+      - ./data:/ci-bot/data
+      - ./var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    links:
+      - db
+

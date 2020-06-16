@@ -49,10 +49,6 @@ public class PipelineExecutor {
                         .filter(Stage::getSystem)
                         .forEach(Stage::execute);
             }
-            //TODO переделать финальный лог
-//            SendMessage finalLog=new SendMessage(executablePipeline.getId(),"*BUILD COMPLETE*");
-//            finalLog.enableMarkdown(true);
-//            executablePipeline.getSendMessageConsumer().accept(finalLog);
             pipelineHistoryService.writePipelineHistory(pipeline, failed);
         }
     }

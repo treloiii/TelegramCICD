@@ -1,6 +1,7 @@
 package com.trelloiii.cibot.dto.logger;
 
 import com.google.common.hash.Hashing;
+import com.trelloiii.cibot.Utils;
 import com.trelloiii.cibot.model.Pipeline;
 import lombok.SneakyThrows;
 
@@ -30,7 +31,9 @@ public abstract class AbstractLogger {
     @SneakyThrows
     public String filename() {
         LocalDateTime nowTime=LocalDateTime.now(ZoneId.systemDefault());
-        return String.format("build_log_%s_%d_%d_%d_%d_%d.log",
+        return String.format("%s/%s/build_log_%s_%d_%d_%d_%d_%d.log",
+                Utils.USER_DIST,
+                "logs",
                 pipeline.getName(),
                 nowTime.getYear(),
                 nowTime.getMonthValue(),

@@ -1,5 +1,6 @@
 package com.trelloiii.cibot.service;
 
+import com.trelloiii.cibot.Utils;
 import com.trelloiii.cibot.model.Root;
 import com.trelloiii.cibot.model.User;
 import com.trelloiii.cibot.repository.RootRepository;
@@ -58,7 +59,7 @@ public class UserService {
     public void generateNewRootPassword(){
         Root root=rootRepository.findAll().get(0);
         root.setPassword(UUID.randomUUID().toString());
-        File password=new File("./root_password");
+        File password=new File(String.format("%s/root_password", Utils.USER_DIST));
         try (FileWriter fileWriter=new FileWriter(password)){
             fileWriter.write(root.getPassword());
         }

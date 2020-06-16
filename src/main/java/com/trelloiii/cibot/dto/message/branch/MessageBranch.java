@@ -46,8 +46,6 @@ public class MessageBranch extends AbstractBranch {
             case HELP:
                 helpSend(chatId);
                 break;
-            case "jopa":
-                send(new SendMessage(chatId, "sosi"));
             default:
                 redactOrDefault(messageText, Long.valueOf(chatId));
         }
