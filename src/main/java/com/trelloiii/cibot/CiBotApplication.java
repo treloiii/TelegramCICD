@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 @SpringBootApplication
 public class CiBotApplication {
 

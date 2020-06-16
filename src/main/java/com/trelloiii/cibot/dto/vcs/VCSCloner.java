@@ -26,11 +26,7 @@ public class VCSCloner {
         try {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
             Map<String,GHRepository> repos = gitHub.getMyself().getAllRepositories();
-            GHRepository repository = repos.values()
-                    .stream()
-                    .filter(grp->grp.getFullName().equals(repositoryName))
-                    .findAny()
-                    .orElseThrow(NullPointerException::new);                        //https://<Token>@github.com/user/repo.git
+            GHRepository repository=VCSUtils.getRepositoryByFullName(repositoryName,repos);//https://<Token>@github.com/user/repo.git
             Process process = Runtime.getRuntime().exec(new String[]{"git", "clone", String.format("https://%s@github.com/%s.git",token, repository.getFullName())});
             int res = process.waitFor();
 

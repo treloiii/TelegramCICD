@@ -19,6 +19,7 @@ public class Pipeline {
     private String repositoryName;
     private String oauthToken;
     private String branch;
+    private Long timer;
     @Transient
     private String logPath;
 

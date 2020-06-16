@@ -2,12 +2,14 @@ package com.trelloiii.cibot.dto.message.branch;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.K;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -41,8 +43,22 @@ public abstract class AbstractBranch implements Branch {
         KeyboardRow keyboardFirstRow = new KeyboardRow();
         for(String name:names)
             keyboardFirstRow.add(new KeyboardButton(name));
-        keyboard.add(keyboardFirstRow);
+        if(names.length<4) {
+            keyboard.add(keyboardFirstRow);
+        }else{
+            twoLines(keyboard,keyboardFirstRow);
+        }
         replyKeyboardMarkup.setKeyboard(keyboard);
+    }
+
+    private void twoLines(List<KeyboardRow> keyboard, KeyboardRow keyboardFirstRow) {
+        KeyboardRow row1=new KeyboardRow();
+        row1.addAll(keyboardFirstRow.subList(0,keyboardFirstRow.size()/2));
+        keyboard.add(row1);
+
+        KeyboardRow row2=new KeyboardRow();
+        row2.addAll(keyboardFirstRow.subList(keyboardFirstRow.size()/2,keyboardFirstRow.size()));
+        keyboard.add(row2);
     }
 
 }

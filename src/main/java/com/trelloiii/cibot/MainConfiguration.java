@@ -2,6 +2,8 @@ package com.trelloiii.cibot;
 
 import com.trelloiii.cibot.dto.message.events.CallbackEventEventListener;
 import com.trelloiii.cibot.dto.message.events.MessageEventListener;
+import com.trelloiii.cibot.dto.vcs.VCSWatcher;
+import com.trelloiii.cibot.model.Pipeline;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
@@ -26,5 +28,10 @@ public class MainConfiguration {
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CallbackEventEventListener callbackEventEventListener(Consumer<SendMessage> sendMessageConsumer){
         return new CallbackEventEventListener(sendMessageConsumer);
+    }
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public VCSWatcher watcher(Pipeline pipeline){
+        return new VCSWatcher(pipeline);
     }
 }

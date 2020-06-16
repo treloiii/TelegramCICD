@@ -8,6 +8,10 @@ import com.trelloiii.cibot.model.Pipeline;
 import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.service.PipelineHistoryService;
 import com.trelloiii.cibot.service.PipelineService;
+import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -15,13 +19,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+
 @Component
-public class CallBackUtils {
+@Log
+public class PipelineUtils {
 
     private final PipelineHistoryService pipelineHistoryService;
     private final PipelineService pipelineService;
 
-    public CallBackUtils(PipelineHistoryService pipelineHistoryService, PipelineService pipelineService) {
+    public PipelineUtils(PipelineHistoryService pipelineHistoryService, PipelineService pipelineService) {
         this.pipelineHistoryService = pipelineHistoryService;
         this.pipelineService = pipelineService;
     }
@@ -31,6 +37,7 @@ public class CallBackUtils {
         try {
             Pipeline pipeline = pipelineService.getPipeline(data);
             vcsCloner = new VCSCloner(pipeline.getOauthToken(), pipeline.getRepositoryName());
+            sendMessageConsumer.accept(new SendMessage(chatId,"Checkout VCS..."));
             vcsCloner.cloneRepos();
         //^parse vcs
 
@@ -44,8 +51,7 @@ public class CallBackUtils {
             sendMessageConsumer.accept(new SendMessage(chatId,"This pipeline not found"));
         }
         catch (BuildFileNotFoundException | EnvironmentNotFoundException | GithubAuthException | GithubRepositoryNotFoundException e){
-            if(vcsCloner!=null)
-                vcsCloner.removeRepos();
+            Optional.ofNullable(vcsCloner).ifPresent(VCSCloner::removeRepos);
             sendMessageConsumer.accept(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
         }
     }
@@ -55,13 +61,20 @@ public class CallBackUtils {
             Pipeline pipeline=pipelineService.getPipelineByReposName(hook.getRepository());
             if(pipeline.getBranch()==null||pipeline.getBranch().equals(hook.getBranch())) {
                 vcsCloner = new VCSCloner(pipeline.getOauthToken(), pipeline.getRepositoryName());
-                vcsCloner.cloneRepos();
-                PipelineYamlParser parser = new PipelineYamlParser(pipeline);
-                pipeline = parser.parse();
-                pipelineService.execute(new QuietPipeline(pipeline, new QuietLogger(pipeline)));
+                cloneAndExecute(vcsCloner,pipeline);
             }
         }
         catch (Exception e){
+            Optional.ofNullable(vcsCloner).ifPresent(VCSCloner::removeRepos);
+            e.printStackTrace();
+        }
+    }
+    public void startPipelineQuiet(Pipeline pipeline){
+        VCSCloner vcsCloner=null;
+        try{
+            vcsCloner = new VCSCloner(pipeline.getOauthToken(), pipeline.getRepositoryName());
+            cloneAndExecute(vcsCloner,pipeline);
+        }catch (Exception e){
             Optional.ofNullable(vcsCloner).ifPresent(VCSCloner::removeRepos);
             e.printStackTrace();
         }
@@ -108,6 +121,13 @@ public class CallBackUtils {
         loggablePipeline.initLogger();
         return loggablePipeline;
     }
+
+    private void cloneAndExecute(VCSCloner cloner,Pipeline pipeline) throws EnvironmentNotFoundException {
+        cloner.cloneRepos();
+        PipelineYamlParser parser = new PipelineYamlParser(pipeline);
+        pipeline = parser.parse();
+        pipelineService.execute(new QuietPipeline(pipeline, new QuietLogger(pipeline)));
+    }
     private String fixedString(String s,String joiner){
         StringBuilder sb=new StringBuilder();
         sb.append(s);
@@ -118,9 +138,5 @@ public class CallBackUtils {
             }
         }
         return sb.toString();
-    }
-
-    public void redactPipeline(String pipelineId, Long chatId, Consumer<SendMessage> sendMessage) {
-
     }
 }

@@ -1,6 +1,6 @@
 package com.trelloiii.cibot.dto.message.branch;
 
-import com.trelloiii.cibot.dto.pipeline.CallBackUtils;
+import com.trelloiii.cibot.dto.pipeline.PipelineUtils;
 import com.trelloiii.cibot.dto.pipeline.PipelineFactory;
 import com.trelloiii.cibot.dto.pipeline.PipelineRedactor;
 import com.trelloiii.cibot.model.Pipeline;
@@ -14,18 +14,19 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.trelloiii.cibot.dto.pipeline.PipelineRedactor.*;
 
 @Component
 public class MessageBranch extends AbstractBranch {
     private final PipelineService pipelineService;
-    private final CallBackUtils callbackUtils;
+    private final PipelineUtils callbackUtils;
     private final PipelineRedactor redactor;
 
     @Autowired
-    public MessageBranch(PipelineService pipelineService, CallBackUtils callbackUtils, PipelineRedactor redactor) {
+    public MessageBranch(PipelineService pipelineService, PipelineUtils callbackUtils, PipelineRedactor redactor) {
         this.pipelineService = pipelineService;
         this.callbackUtils = callbackUtils;
         this.redactor = redactor;
@@ -46,34 +47,39 @@ public class MessageBranch extends AbstractBranch {
                 helpSend(chatId);
                 break;
             case "jopa":
-                send(new SendMessage(chatId,"sosi"));
+                send(new SendMessage(chatId, "sosi"));
             default:
-                redactOrDefault(messageText,Long.valueOf(chatId));
+                redactOrDefault(messageText, Long.valueOf(chatId));
         }
     }
 
     private void helpSend(String chatId) {
-        SendMessage message=new SendMessage();
+        SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.enableMarkdown(true);
         message.setText(
                 "Hello its a simple *CI/CD bot*\n" +
-                "This bot can make simple builds and deployment\n"+
-                "To know full info, please [visit docs page](https://botinfo.trelloiii.site)");//TODO сменить урл если надо будет
+                        "This bot can make simple builds and deployment\n" +
+                        "To know full info, please [visit docs page](https://botinfo.trelloiii.site)");//TODO сменить урл если надо будет
         send(message);
     }
 
     private void redactOrDefault(String field, Long chatId) {
-        if(redactor.getRedact()){
-            if (redactor.checkField()) {
+        if (redactor.getRedact()) { //if redact mod on
+            if (redactor.checkField()) { //if user already pick field
                 redactor.redact(field);
-                send(mainProcess(chatId,"Successfully changed "+redactor.getField()));
+                send(mainProcess(chatId, "Successfully changed " + redactor.getField()));
                 redactor.clear();
-            }else{
-                redactor.setField(field);
-                send(new SendMessage(chatId,"Now enter new value"));
+            } else { //if user dont pick value
+                if(names.contains(field)) { //if user send correct field name
+                    redactor.setField(field);
+                    send(new SendMessage(chatId, "Now enter new value"));
+                }
+                else{ //if user send incorrect field name
+                    send(mainProcess(chatId, "Wrong value"));
+                }
             }
-        }else {
+        } else { //if redact mod off
             send(mainProcess(chatId, "What can I help you?"));
         }
     }
@@ -105,7 +111,7 @@ public class MessageBranch extends AbstractBranch {
     private void redactPipeline(String pipelineId, Long chatId) {
         SendMessage message = new SendMessage(chatId, "pick what you want to change");
         message.enableMarkdown(true);
-        setOneRowButtons(message, "name","repository name","token","vcs branch");
+        setOneRowButtons(message, "name", "repository name", "token", "vcs branch", "timer");
         redactor.setPipelineId(pipelineId);
         redactor.setRedact(true);
         send(message);
@@ -114,23 +120,26 @@ public class MessageBranch extends AbstractBranch {
     private void showPipelines(Message tmMessage) {
         List<Pipeline> pipelineList = pipelineService.getPipelines();
         pipelineList.forEach(pipeline -> {
-            String secured="You're not a creator of this pipeline.\nToken is hidden";
-            if(pipeline.getOwner().getId().equals(tmMessage.getFrom().getId())){
-                secured=pipeline.getOauthToken();
+            String secured = "You're not a creator of this pipeline.\nToken is hidden";
+            if (pipeline.getOwner().getId().equals(tmMessage.getFrom().getId())) {
+                secured = pipeline.getOauthToken();
             }
             SendMessage message = new SendMessage(
                     tmMessage.getChatId(),
                     String.format(
-                            "%s: [repository: %s , token: %s]",
+                            "*%s*:\n `repository:` %s\n `token:` %s\n `vcs branch: `%s\n `timer: `%s",
                             pipeline.getName(),
                             pipeline.getRepositoryName(),
-                            secured
+                            secured,
+                            Optional.ofNullable(pipeline.getBranch()).orElse("not set"),
+                            String.valueOf(pipeline.getTimer()).equals("null") ? "not set" : String.valueOf(pipeline.getTimer()) // pizdec idiotstvo
                     )
             );
+            message.enableMarkdown(true);
             pipelineInline(message, pipeline);
             send(message);
         });
-        if (pipelineList.isEmpty()){
+        if (pipelineList.isEmpty()) {
             SendMessage message = new SendMessage(tmMessage.getChatId(), "*Pipeline list is empty*".toUpperCase());
             message.enableMarkdown(true);
             send(message);

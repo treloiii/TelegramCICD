@@ -8,11 +8,16 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Component
 public class PipelineRedactor {
+    public static List<String> names= Arrays.asList("name","repository name","token","vcs branch","timer");
     private PipelineService pipelineService;
     private Boolean redact=false;
     private String pipelineId;
@@ -45,6 +50,10 @@ public class PipelineRedactor {
                 break;
             case "vcs branch":
                 pipeline.setBranch(value);
+            case "timer":
+                long timer=Long.parseLong(value);
+                timer=timer*60*1000;
+                pipeline.setTimer(timer);
         }
         pipelineService.savePipeline(pipeline);
     }
