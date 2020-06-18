@@ -24,9 +24,6 @@ public class Stage {
     }
     @SneakyThrows
     public int execute(AbstractLogger logger) {
-        if (!system)
-            logger.sendLog(String.format("Starting stage: %s", this.name.toUpperCase()),
-                    String.format("Starting stage: %s", this.name.toUpperCase()));
         for (Instruction instruction : instructions) {
             if(system){
                 instruction.execute();

@@ -20,11 +20,11 @@ public class Logger extends AbstractLogger {
         this.chatId = chatId;
     }
 
-    public void sendLog(String log,String rawLog) throws InterruptedException {
+    public void sendLog(String log, String rawLog) throws InterruptedException {
         writeLogToFile(rawLog);
         SendMessage sendMessage = new SendMessage(this.chatId, log);
         sendMessage.enableMarkdown(true);
-        Thread.sleep(100);
+        Thread.sleep(1);
         messageConsumer.accept(sendMessage);
     }
 }

@@ -1,9 +1,3 @@
-#!/bin/bash
-echo Hello this script provide you install CI bot for telegram
-read -p 'Provide token for connecting to telegram: ' token
-read -p 'Specify the port for running bot: ' port
-read  -p 'Specify port of mysql database for bot: ' mysql_port
-cat <<END > docker-compose.yml
 version: '3'
 services:
   db:
@@ -23,11 +17,11 @@ services:
       MYSQL_HOST: db
       MYSQL_USER: root
       MYSQL_PASSWORD: root
-      MYSQL_PORT: $mysql_port
-      BOT_TOKEN: $token
-      PORT: $port
+      MYSQL_PORT: 3306
+      BOT_TOKEN: 1294893988:AAGxrVpeRm9S18ByqI2CaPcferTUl0L31yk
+      PORT: 8888
     ports:
-     - $port:$port
+     - 8888:8888
     volumes:
       - ./data:/ci-bot/data
       - ./var/run/docker.sock:/var/run/docker.sock
@@ -35,7 +29,3 @@ services:
     links:
       - db
 
-END
-
-echo Installing...
-docker-compose up -d

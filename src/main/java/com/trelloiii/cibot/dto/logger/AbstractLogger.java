@@ -31,6 +31,10 @@ public abstract class AbstractLogger {
     @SneakyThrows
     public String filename() {
         LocalDateTime nowTime=LocalDateTime.now(ZoneId.systemDefault());
+
+        File logs=new File(String.format("%s/logs",Utils.USER_DIST));//create logs folder
+        if(!logs.exists())
+            logs.mkdirs();
         return String.format("%s/%s/build_log_%s_%d_%d_%d_%d_%d.log",
                 Utils.USER_DIST,
                 "logs",
