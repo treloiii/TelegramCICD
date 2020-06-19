@@ -7,7 +7,7 @@ public class QuietLogger extends AbstractLogger {
         super(pipeline);
     }
     @Override
-    public void sendLog(String log, String rawLog){
-        writeLogToFile(rawLog);
+    public void sendLog(String log){
+        writeLogToFile(log);
     }
 }

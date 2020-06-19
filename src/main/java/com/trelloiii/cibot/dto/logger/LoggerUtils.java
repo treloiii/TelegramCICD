@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LoggerUtils {
     static LogThread logThread = new LogThread();
@@ -33,16 +34,48 @@ public class LoggerUtils {
         }
     }
     public static void readLog(String log, AbstractLogger logger, boolean isError){
-//        sendLog(log,logger,isError);
-        logThread.add(new LogWrapper(log, logger, isError));
+        //logThread.add(new LogWrapper(log, logger, isError));
+        logThread.push(log, logger, isError);
     }
+    public static void readLast( AbstractLogger logger, boolean isError){
+        logThread.pushLast(logger,isError);
+    }
+    public static void readLog(List<String> lines,AbstractLogger logger,boolean isError){
+        List<String> grouped= group(lines);
+        grouped.forEach(line->logThread.add(new LogWrapper(line,logger,isError)));
+    }
+    private static List<String> group(List<String> lines){
+        int max=4096;
+        List<String> res=new ArrayList<>();
+        StringBuilder builder=new StringBuilder();
+        for(int i=0;i<lines.size();){
+            String line=lines.get(i);
+            if(line.length()<=max){
+                builder.append(line).append("\n");
+                max-=line.length();
+                i++;
+            }else{
+                res.add(builder.toString());
+                builder=new StringBuilder();
+                max=4096;
+            }
+        }
+        res.add(builder.toString());
+        return res;
+    }
+    public static void readFileLog(String log,AbstractLogger logger){
+        logger.writeLogToFile(log);
+    }
+
+    @SneakyThrows
     public static void sendLog(String output, AbstractLogger logger, boolean isError) {
+        Thread.sleep(1000); //to avoid telegram restriction of rps
         try {
-            if (!output.isEmpty()) {
+            if (!output.trim().isEmpty()) {
                 if (!isError)
-                    logger.sendLog(String.format("*[LOG]*: `%s`", output),output);
+                    logger.sendLog(String.format("[INFO]: %s", output));
                 else
-                    logger.sendLog(String.format("*[ERROR]*: `%s`", output),output);
+                    logger.sendLog(String.format("[ERROR]: %s", output));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,11 +85,31 @@ public class LoggerUtils {
         sendLog(logWrapper.getLog(),logWrapper.getLogger(),logWrapper.isError());
     }
     public static class LogThread implements Runnable{
-        private BlockingQueue<LogWrapper> queue=new ArrayBlockingQueue<>(1000);
+        private final BlockingQueue<LogWrapper> queue=new ArrayBlockingQueue<>(1000);
+        private CopyOnWriteArrayList<String> list=new CopyOnWriteArrayList<>();
+        private int size=3800;
         @SneakyThrows
         public void add(LogWrapper s){
             queue.put(s);
         }
+        @SneakyThrows
+        public synchronized void push(String line, AbstractLogger logger, boolean isError){
+            if(line.length()<=size){
+                list.add(line+"\n");
+                size-=line.length();
+            }else{
+                String res=list.stream().reduce("",String::concat);
+                add(new LogWrapper(res,logger,isError));
+                list=new CopyOnWriteArrayList<>();
+                list.add(line+"\n");
+                size=3800-line.length();
+            }
+        }
+        public synchronized void pushLast(AbstractLogger logger, boolean isError){
+            add(new LogWrapper(list.stream().reduce("",String::concat),logger,isError));
+            list=new CopyOnWriteArrayList<>();
+        }
+
         @SneakyThrows
         @Override
         public void run() {

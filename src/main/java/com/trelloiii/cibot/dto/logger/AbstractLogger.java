@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,5 +46,8 @@ public abstract class AbstractLogger {
                 nowTime.getHour(),
                 nowTime.getMinute());
     }
-    public abstract void sendLog(String log,String rawLog) throws InterruptedException;
+    public abstract void sendLog(String log) throws InterruptedException;
+    public void fileLog(String log) throws IOException{
+        writeLogToFile(log);
+    }
 }

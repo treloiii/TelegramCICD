@@ -24,7 +24,7 @@ services:
      - 8888:8888
     volumes:
       - ./data:/ci-bot/data
-      - ./var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: always
     links:
       - db

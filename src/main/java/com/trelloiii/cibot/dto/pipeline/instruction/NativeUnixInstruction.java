@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 import java.io.*;
 import java.time.Duration;
 
-import static com.trelloiii.cibot.dto.logger.LoggerUtils.readLog;
+import static com.trelloiii.cibot.dto.logger.LoggerUtils.*;
 
 @Data
 @AllArgsConstructor
@@ -22,9 +22,7 @@ public class NativeUnixInstruction implements Instruction {
     private String directory;
     private Boolean status;
     private Boolean ignoreOnExit = false;
-    private final long time=System.currentTimeMillis();
-    private boolean flag=true;
-
+    private int limit=3;
     public NativeUnixInstruction(String text, String directory) {
         this.text = text;
         this.directory = directory;
@@ -38,8 +36,8 @@ public class NativeUnixInstruction implements Instruction {
 
     public int execute(AbstractLogger logger) {
         try {
-
-
+//            readLog(String.format("starting %s",text),logger,false);
+            System.out.println(text);
             ProcessResult res = new ProcessExecutor(text.split(" "))
                     .directory(new File(directory))
                     .readOutput(true)
@@ -49,22 +47,20 @@ public class NativeUnixInstruction implements Instruction {
                             readLog(s, logger, true);
                         }
                     })
-                    .redirectOutput(new LogOutputStream() {
+                    .redirectOutput(new LogOutputStream(){
                         @Override
                         protected void processLine(String s) {
-                            if(System.currentTimeMillis()-time<90*1000) {
+                            readFileLog(s, logger);
+                            if(limit>0) {
+                                limit--;
+                            }else{
                                 readLog(s, logger, false);
-                            }
-                            else{
-                                if(flag){
-                                    readLog("Too many logs, skip others for performance.\n" +
-                                            "Full log will be in file on server",logger,false);
-                                    flag=false;
-                                }
+                                limit=3;
                             }
                         }
                     })
                     .execute();
+            readLast(logger,false);
             int code = res.getExitValue();
             status = code == 0;
 //            readLog(String.format("Executing %s please wait...",text),logger,false);

@@ -33,9 +33,7 @@ public class Bot extends TelegramLongPollingBot {
         Consumer<SendMessage> consumer = sendMessage -> {
             try {
                 execute(sendMessage);
-            }
-            catch (TelegramApiRequestException ignored){}
-            catch (Exception e) {
+            } catch (Exception e){
                 e.printStackTrace();
             }
         };
