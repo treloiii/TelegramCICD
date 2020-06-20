@@ -36,7 +36,6 @@ public class NativeUnixInstruction implements Instruction {
 
     public int execute(AbstractLogger logger) {
         try {
-//            readLog(String.format("starting %s",text),logger,false);
             System.out.println(text);
             ProcessResult res = new ProcessExecutor(text.split(" "))
                     .directory(new File(directory))
@@ -51,21 +50,13 @@ public class NativeUnixInstruction implements Instruction {
                         @Override
                         protected void processLine(String s) {
                             readFileLog(s, logger);
-                            if(limit>0) {
-                                limit--;
-                            }else{
-                                readLog(s, logger, false);
-                                limit=3;
-                            }
+                            readLog(s, logger, false);
                         }
                     })
                     .execute();
             readLast(logger,false);
             int code = res.getExitValue();
             status = code == 0;
-//            readLog(String.format("Executing %s please wait...",text),logger,false);
-//            readLog(res.getOutput().getLines(),logger, !status);
-            //ТУТ МЫ СОСЕМ НА БЛОКИРОВКЕ, ПРИЧЕМ КОНКРЭТНО ТАК СОСЕМ, ОЧЕНЬ ДОЛГО СОСЕМ
             if (ignoreOnExit) {
                 status = true;
                 code = 0;

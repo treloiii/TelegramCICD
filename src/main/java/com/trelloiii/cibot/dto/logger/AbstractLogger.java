@@ -47,6 +47,7 @@ public abstract class AbstractLogger {
                 nowTime.getMinute());
     }
     public abstract void sendLog(String log) throws InterruptedException;
+    public abstract void sendForceLog(String log);
     public void fileLog(String log) throws IOException{
         writeLogToFile(log);
     }

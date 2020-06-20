@@ -9,16 +9,14 @@ import com.trelloiii.cibot.model.PipelineHistory;
 import com.trelloiii.cibot.service.PipelineHistoryService;
 import com.trelloiii.cibot.service.PipelineService;
 import lombok.extern.java.Log;
-import lombok.extern.log4j.Log4j;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Component
 @Log
@@ -32,27 +30,27 @@ public class PipelineUtils {
         this.pipelineService = pipelineService;
     }
 
-    public void startPipeline(String data, Long chatId, Consumer<SendMessage> sendMessageConsumer) {
+    public void startPipeline(String data, Long chatId, Function<Object, Message> sendMessageFunction) {
        VCSCloner vcsCloner=null;
         try {
             Pipeline pipeline = pipelineService.getPipeline(data);
             vcsCloner = new VCSCloner(pipeline.getOauthToken(), pipeline.getRepositoryName());
-            sendMessageConsumer.accept(new SendMessage(chatId,"Checkout VCS..."));
+            sendMessageFunction.apply(new SendMessage(chatId,"Checkout VCS..."));
             vcsCloner.cloneRepos();
         //^parse vcs
 
             PipelineYamlParser parser = new PipelineYamlParser(pipeline);
 
             pipeline = parser.parse();
-            pipelineService.execute(generateLoggable(chatId.toString(), pipeline,sendMessageConsumer));
-            sendMessageConsumer.accept(new SendMessage(chatId, String.format("Pipeline with id %s started!", data)));
+            pipelineService.execute(generateLoggable(chatId.toString(), pipeline,sendMessageFunction));
+            sendMessageFunction.apply(new SendMessage(chatId, String.format("Pipeline with id %s started!", data)));
         }
         catch (PipelineNotFoundException e){
-            sendMessageConsumer.accept(new SendMessage(chatId,"This pipeline not found"));
+            sendMessageFunction.apply(new SendMessage(chatId,"This pipeline not found"));
         }
         catch (BuildFileNotFoundException | EnvironmentNotFoundException | GithubAuthException | GithubRepositoryNotFoundException e){
             Optional.ofNullable(vcsCloner).ifPresent(VCSCloner::removeRepos);
-            sendMessageConsumer.accept(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
+            sendMessageFunction.apply(new SendMessage(chatId,e.getMessage()+"\nBuild will be terminated"));
         }
     }
     public void startPipelineQuiet(GithubHook hook){
@@ -79,7 +77,7 @@ public class PipelineUtils {
             e.printStackTrace();
         }
     }
-    public void getHistory(String pipelineId, Long chatId, Consumer<SendMessage> sendMessage){
+    public void getHistory(String pipelineId, Long chatId, Function<Object, Message> sendMessage){
         Pipeline pipeline=pipelineService.getPipeline(pipelineId);
         List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipeline(pipeline);
         SendMessage message=new SendMessage();
@@ -111,13 +109,13 @@ public class PipelineUtils {
         else{
             message.setText(head+"\n"+"*EMPTY*");
         }
-        sendMessage.accept(message);
+        sendMessage.apply(message);
     }
-    private LoggablePipeline generateLoggable(String chatId, Pipeline pipeline, Consumer<SendMessage> sendMessageConsumer) {
+    private LoggablePipeline generateLoggable(String chatId, Pipeline pipeline, Function<Object, Message> sendMessageFunction) {
         LoggablePipeline loggablePipeline = new LoggablePipeline();
         loggablePipeline.setId(chatId);
         loggablePipeline.setPipeline(pipeline);
-        loggablePipeline.setSendMessageConsumer(sendMessageConsumer);
+        loggablePipeline.setSendMessageFunction(sendMessageFunction);
         loggablePipeline.initLogger();
         return loggablePipeline;
     }

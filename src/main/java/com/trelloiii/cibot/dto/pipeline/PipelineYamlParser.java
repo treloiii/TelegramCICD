@@ -42,7 +42,9 @@ public class PipelineYamlParser {
 
             List<Stage> stages = new ArrayList<>(parseStages(map, pipelineConfiguration));
             Stage success=parseSuccessOrFailure(map,pipelineConfiguration,"success");
-            stages.add(success);
+            if(success!=null) {
+                stages.add(success);
+            }
 
 
             pipeline.setFailure(parseSuccessOrFailure(map,pipelineConfiguration,"failure"));

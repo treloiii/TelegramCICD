@@ -69,7 +69,7 @@ public class LoggerUtils {
 
     @SneakyThrows
     public static void sendLog(String output, AbstractLogger logger, boolean isError) {
-        Thread.sleep(1000); //to avoid telegram restriction of rps
+        Thread.sleep(3000); //to avoid telegram restriction of rps, 20 msgs per minute
         try {
             if (!output.trim().isEmpty()) {
                 if (!isError)

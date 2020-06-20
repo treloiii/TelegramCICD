@@ -93,10 +93,10 @@ public class MessageBranch extends AbstractBranch {
         Long chatId = message.getChatId();
         switch (messageText) {
             case "start":
-                callbackUtils.startPipeline(pipelineId, chatId, getSendMessageConsumer());
+                callbackUtils.startPipeline(pipelineId, chatId, getSendMessageFunction());
                 break;
             case "history":
-                callbackUtils.getHistory(pipelineId, chatId, getSendMessageConsumer());
+                callbackUtils.getHistory(pipelineId, chatId, getSendMessageFunction());
                 break;
             case "delete":
                 pipelineService.removePipeline(Long.valueOf(pipelineId));

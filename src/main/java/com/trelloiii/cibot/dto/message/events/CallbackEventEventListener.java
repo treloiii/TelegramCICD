@@ -5,27 +5,28 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 public class CallbackEventEventListener implements EventListener {
-    private final Consumer<SendMessage> sendMessageConsumer;
+    private final Function<Object, Message> sendMessageFunction;
     @Getter
     private final String type="callback";
     @Autowired
     private MessageBranch messageBranch;
 
     @Autowired
-    public CallbackEventEventListener(Consumer<SendMessage> sendMessageConsumer) {
-        this.sendMessageConsumer = sendMessageConsumer;
+    public CallbackEventEventListener(Function<Object, Message> sendMessageFunction) {
+        this.sendMessageFunction = sendMessageFunction;
     }
     @PostConstruct
     public void initBranches(){
-        messageBranch.setSendMessageConsumer(sendMessageConsumer);
+        messageBranch.setSendMessageFunction(sendMessageFunction);
     }
     @Override
     public void listen(Update entity) {

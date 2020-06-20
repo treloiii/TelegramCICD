@@ -2,16 +2,15 @@ package com.trelloiii.cibot.dto.message.branch;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.checkerframework.checker.units.qual.K;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class AbstractBranch implements Branch {
     public static final String HELP="Help";
@@ -19,9 +18,9 @@ public abstract class AbstractBranch implements Branch {
     public static final String SHOW_PIPELINES="Show pipelines";
     @Getter
     @Setter
-    private Consumer<SendMessage> sendMessageConsumer;
-    public void send(SendMessage sendMessage){
-        sendMessageConsumer.accept(sendMessage);
+    private Function<Object, Message> sendMessageFunction;
+    public Message send(SendMessage sendMessage){
+        return sendMessageFunction.apply(sendMessage);
     }
 
     public SendMessage mainProcess(Long chatId, String message){

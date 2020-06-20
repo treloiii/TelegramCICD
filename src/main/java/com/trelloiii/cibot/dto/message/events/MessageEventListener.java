@@ -13,10 +13,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 import javax.annotation.PostConstruct;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class MessageEventListener implements EventListener {
-    private final Consumer<SendMessage> sendMessageConsumer;
+    private final Function<Object, Message> sendMessageFunction;
     @Getter
     private final String type="message";
     @Autowired
@@ -27,14 +27,14 @@ public class MessageEventListener implements EventListener {
     private MessageBranch messageBranch;
     @Autowired
     private ActivationBranch activationBranch;
-    public MessageEventListener(Consumer<SendMessage> sendMessageConsumer) {
-        this.sendMessageConsumer = sendMessageConsumer;
+    public MessageEventListener(Function<Object, Message> sendMessageFunction) {
+        this.sendMessageFunction = sendMessageFunction;
     }
     @PostConstruct
     public void initBranches(){
-        factoryBranch.setSendMessageConsumer(sendMessageConsumer);
-        messageBranch.setSendMessageConsumer(sendMessageConsumer);
-        activationBranch.setSendMessageConsumer(sendMessageConsumer);
+        factoryBranch.setSendMessageFunction(sendMessageFunction);
+        messageBranch.setSendMessageFunction(sendMessageFunction);
+        activationBranch.setSendMessageFunction(sendMessageFunction);
     }
 
     @Override

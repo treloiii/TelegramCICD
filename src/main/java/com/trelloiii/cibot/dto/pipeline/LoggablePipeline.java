@@ -7,18 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoggablePipeline implements ExecutablePipeline {
     private Pipeline pipeline;
-    private Consumer<SendMessage> sendMessageConsumer;
+    private Function<Object, Message> sendMessageFunction;
     private String id;
     private AbstractLogger logger;
     public void initLogger(){
-        logger=new Logger(sendMessageConsumer,id,pipeline);
+        logger=new Logger(sendMessageFunction,id,pipeline);
     }
 }

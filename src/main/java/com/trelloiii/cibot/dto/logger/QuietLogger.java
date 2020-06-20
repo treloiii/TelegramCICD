@@ -10,4 +10,8 @@ public class QuietLogger extends AbstractLogger {
     public void sendLog(String log){
         writeLogToFile(log);
     }
+
+    @Override
+    public void sendForceLog(String log) {
+    }
 }
