@@ -52,6 +52,7 @@ public class PipelineExecutor {
             executablePipeline.getLogger().sendForceLog("`The build is complete.\n" +
                     "Telegram logs will keep coming in contact with telegram api restrictions of request per second\n" +
                     "See full logs on the server`");
+            executablePipeline.getLogger().sendLogFile();
             pipelineHistoryService.writePipelineHistory(pipeline, failed);
         }
     }

@@ -31,7 +31,7 @@ class CiBotApplicationTests {
     }
     @Test
     public void checkCopyDirs(){
-        CopyJavaInstruction copy=new CopyJavaInstruction(Files.currentFolder().getAbsolutePath(),"src/main/resources/templates","/Users/trelloiii/test-ci");
+        CopyJavaInstruction copy=new CopyJavaInstruction(Files.currentFolder().getAbsolutePath(),"src/main/resources/templates","/Users/trelloiii/test-ci",true);
         copy.execute();
     }
 }

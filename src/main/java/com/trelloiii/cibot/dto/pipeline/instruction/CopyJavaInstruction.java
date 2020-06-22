@@ -20,25 +20,30 @@ import static com.trelloiii.cibot.dto.logger.LoggerUtils.readLog;
 public class CopyJavaInstruction extends JavaInstruction {
     private String destinationFolder;
 
-    public CopyJavaInstruction(String workingDir, String targetFile, String destinationFolder) {
-        super(workingDir, targetFile,null);
+    public CopyJavaInstruction(String workingDir, String targetFile, String destinationFolder,Boolean ignoreOnExit) {
+        super(workingDir, targetFile,null,ignoreOnExit);
         this.destinationFolder = destinationFolder;
     }
 
     @Override
     public int execute(AbstractLogger logger) {
         try{
-            readLog(String.format("starting to copy from %s to %s",workingDir,destinationFolder), logger,false);
+            log(String.format("starting to copy from %s to %s",workingDir,destinationFolder), logger,false);
             execute();
-            readLog("copy complete", logger,false);
+            log("copy complete", logger,false);
             status=true;
             return 0;
         }
         catch (Exception e){
-            readLog(String.format("error while copy file %s",workingDir), logger,true);
-            readLog(e.getMessage(), logger,true);
-            status=false;
-            return -1;
+            log(String.format("error while copy file %s",workingDir), logger,true);
+            log(e.getMessage(), logger,true);
+            if(ignoreOnExit){
+                status=true;
+                return 0;
+            }else {
+                status = false;
+                return -1;
+            }
         }
     }
 

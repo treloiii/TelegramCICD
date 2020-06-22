@@ -15,6 +15,8 @@ FROM docker
 RUN apk add openjdk8 \
     && apk add git \
     && apk add maven \
+    && apk add nodejs \
+    && apk add npm \
     && mkdir -p ci-bot \
     && mkdir -p ci-bot/data/logs
 

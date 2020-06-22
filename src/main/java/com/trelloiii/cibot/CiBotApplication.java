@@ -12,11 +12,12 @@ import java.util.TimerTask;
 public class CiBotApplication {
 
     public static void main(String[] args) {
-        setEnv(args);
+        setEnv2(args);
         ApiContextInitializer.init();
         SpringApplication.run(CiBotApplication.class, args);
     }
 
+    @Deprecated
     private static void setEnv(String[] args){
         try{
             System.setProperty("MYSQL_HOST",args[0]);
@@ -28,6 +29,16 @@ public class CiBotApplication {
         catch (NullPointerException | ArrayIndexOutOfBoundsException e){
             System.out.println("environments not found");
         }
+    }
+    private static void setEnv2(String[] args){
+        try {
+            System.setProperty("BOT_TOKEN", args[3]);
+            System.setProperty("PORT", args[4]);
+        }
+        catch (NullPointerException | ArrayIndexOutOfBoundsException e){
+            System.out.println("environments not found");
+        }
+
     }
 
 }

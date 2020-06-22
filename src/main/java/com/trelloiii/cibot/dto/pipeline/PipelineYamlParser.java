@@ -40,8 +40,8 @@ public class PipelineYamlParser {
             Map<String, Object> pipelineConfiguration = configurationParser(map);
             pipeline.setConfiguration(pipelineConfiguration);
 
-            List<Stage> stages = new ArrayList<>(parseStages(map, pipelineConfiguration));
-            Stage success=parseSuccessOrFailure(map,pipelineConfiguration,"success");
+            List<Stage> stages = new ArrayList<>(parseStages(map, pipelineConfiguration)); // add stages
+            Stage success=parseSuccessOrFailure(map,pipelineConfiguration,"success"); //parse onsuccess/onfailure
             if(success!=null) {
                 stages.add(success);
             }
@@ -50,7 +50,7 @@ public class PipelineYamlParser {
             pipeline.setFailure(parseSuccessOrFailure(map,pipelineConfiguration,"failure"));
             pipeline.setSuccess(success);
 
-            if ((Boolean) pipelineConfiguration.get("delete_after"))
+            if ((Boolean) pipelineConfiguration.get("delete_after")) // remove target after build if it not override
                 stages.add(systemAfterBuild());
             pipeline.setStages(stages);
 
@@ -128,7 +128,7 @@ public class PipelineYamlParser {
                             return new NativeUnixInstruction((String) value, dir, true);
                         case "copy":
                             val copyBlock = (Map<String, Object>) value;
-                            return new CopyJavaInstruction(dir, (String) copyBlock.get("target"), (String) copyBlock.get("dist"));
+                            return new CopyJavaInstruction(dir, (String) copyBlock.get("target"), (String) copyBlock.get("dist"),false);
                         default:
                             throw new UnknownBuildOperationException(key);
                     }
@@ -150,7 +150,7 @@ public class PipelineYamlParser {
         Stage afterStage = new Stage();
         afterStage.setSystem(true);
         afterStage.setName("sys_after");
-        afterStage.setInstructions(Collections.singletonList(new RemoveJavaInstruction(name)));
+        afterStage.setInstructions(Collections.singletonList(new RemoveJavaInstruction(name,true)));
         return afterStage;
     }
 }

@@ -43,6 +43,7 @@ public class NativeUnixInstruction implements Instruction {
                     .redirectError(new LogOutputStream() {
                         @Override
                         protected void processLine(String s) {
+                            readFileLog(s, logger);
                             readLog(s, logger, true);
                         }
                     })

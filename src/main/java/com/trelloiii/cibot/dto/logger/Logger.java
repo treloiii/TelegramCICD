@@ -2,6 +2,7 @@ package com.trelloiii.cibot.dto.logger;
 
 import com.trelloiii.cibot.model.Pipeline;
 import org.telegram.telegrambots.meta.api.methods.send.SendDice;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -54,4 +55,13 @@ public class Logger extends AbstractLogger {
         sendMessage.enableMarkdown(true);
         sendMessageFunction.apply(sendMessage);
     }
+
+    @Override
+    public void sendLogFile() {
+        SendDocument sendDocument=new SendDocument();
+        sendDocument.setDocument(getLogFile());
+        sendDocument.setChatId(chatId);
+        sendMessageFunction.apply(sendDocument);
+    }
+
 }

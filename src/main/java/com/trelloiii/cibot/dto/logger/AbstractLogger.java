@@ -3,6 +3,7 @@ package com.trelloiii.cibot.dto.logger;
 import com.google.common.hash.Hashing;
 import com.trelloiii.cibot.Utils;
 import com.trelloiii.cibot.model.Pipeline;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.File;
@@ -14,6 +15,7 @@ import java.time.ZoneId;
 
 public abstract class AbstractLogger {
     public final Pipeline pipeline;
+    @Getter
     public final File logFile;
 
     protected AbstractLogger(Pipeline pipeline) {
@@ -48,6 +50,7 @@ public abstract class AbstractLogger {
     }
     public abstract void sendLog(String log) throws InterruptedException;
     public abstract void sendForceLog(String log);
+    public abstract void sendLogFile();
     public void fileLog(String log) throws IOException{
         writeLogToFile(log);
     }

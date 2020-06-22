@@ -24,6 +24,7 @@ public class VCSCloner {
 
     public void cloneRepos(){
         try {
+            removeRepos();
             GitHub gitHub = GitHub.connectUsingOAuth(token);
             Map<String,GHRepository> repos = gitHub.getMyself().getAllRepositories();
             GHRepository repository=VCSUtils.getRepositoryByFullName(repositoryName,repos);//https://<Token>@github.com/user/repo.git
@@ -50,6 +51,6 @@ public class VCSCloner {
     }
 
     public void removeRepos() {
-        new NativeUnixInstruction(String.format("rm -r %s",repositoryName),"./").execute();
+        new NativeUnixInstruction(String.format("rm -r %s",repositoryName.split("/")[1]),"./").execute();
     }
 }

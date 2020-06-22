@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.stickers.SetStickerSetThumb;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -42,6 +43,8 @@ public class Bot extends TelegramLongPollingBot {
                     return execute((SendMessage)sendMessage);
                 else if(sendMessage instanceof EditMessageText)
                     execute((EditMessageText)sendMessage);
+                else if(sendMessage instanceof SendDocument)
+                    execute((SendDocument) sendMessage);
                 else
                     throw new RuntimeException("Bad sendmessage type");
             } catch (Exception e){

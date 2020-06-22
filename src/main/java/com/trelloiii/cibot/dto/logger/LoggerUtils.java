@@ -45,7 +45,7 @@ public class LoggerUtils {
         grouped.forEach(line->logThread.add(new LogWrapper(line,logger,isError)));
     }
     private static List<String> group(List<String> lines){
-        int max=4096;
+        int max=3800;
         List<String> res=new ArrayList<>();
         StringBuilder builder=new StringBuilder();
         for(int i=0;i<lines.size();){
@@ -57,7 +57,7 @@ public class LoggerUtils {
             }else{
                 res.add(builder.toString());
                 builder=new StringBuilder();
-                max=4096;
+                max=3800;
             }
         }
         res.add(builder.toString());
