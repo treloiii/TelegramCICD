@@ -10,7 +10,7 @@ services:
     image: mysql:8.0.20
     container_name: mysql-bot
     ports:
-     - 3306:3306
+     - $mysql_port:3306
     volumes:
       - ./mysql_data:/var/lib/mysql
     environment:
@@ -30,12 +30,10 @@ services:
      - $port:$port
     volumes:
       - ./data:/ci-bot/data
-      - ./var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: always
     links:
       - db
-
 END
-
 echo Installing...
 docker-compose up -d
