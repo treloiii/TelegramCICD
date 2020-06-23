@@ -17,10 +17,6 @@ import java.util.function.Function;
 
 @Configuration
 public class MainConfiguration {
-    @Value("${proxy.host}")
-    private String proxyHost;
-    @Value("${proxy.port}")
-    private String proxyPort;
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public MessageEventListener messageEventListener(Function<Object, Message> sendMessageConsumer){

@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 public class Bot extends TelegramLongPollingBot {
     @Value("${bot.token}")
     private String botToken;
+    @Value("${bot.name}")
+    private String botName;
     private final MessageDistributor messageDistributor;
 
     @Autowired
@@ -70,7 +72,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "project_ci_bot";
+        return botName;
     }
 
     @Override

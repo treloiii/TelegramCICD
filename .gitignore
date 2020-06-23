@@ -1,10 +1,12 @@
 *.log
 mysql_data
+build.sh
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**
 !**/src/test/**
+prod
 data
 var
 ### STS ###

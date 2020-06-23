@@ -32,8 +32,9 @@ public class CiBotApplication {
     }
     private static void setEnv2(String[] args){
         try {
-            System.setProperty("BOT_TOKEN", args[3]);
-            System.setProperty("PORT", args[4]);
+            System.setProperty("BOT_TOKEN", args[0]);
+            System.setProperty("BOT_NAME", args[1]);
+            System.setProperty("PORT", args[2]);
         }
         catch (NullPointerException | ArrayIndexOutOfBoundsException e){
             System.out.println("environments not found");
