@@ -8,17 +8,16 @@ import com.trelloiii.cibot.exceptions.BuildFileNotFoundException;
 import com.trelloiii.cibot.exceptions.EnvironmentNotFoundException;
 import com.trelloiii.cibot.exceptions.UnknownBuildOperationException;
 import com.trelloiii.cibot.model.Pipeline;
-import lombok.SneakyThrows;
 import lombok.val;
 import org.yaml.snakeyaml.Yaml;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PipelineYamlParser {
     private final Yaml yaml;
@@ -67,7 +66,7 @@ public class PipelineYamlParser {
             Stage stage = new Stage();
             stage.setName(name);
             stage.setSystem(false);
-            stage.setInstructions(parseInstructionsList(sof,configuration));
+            stage.setInstructions(parseInstructionsList(sof, (String) configuration.get("dir")));
             return stage;
         }
         return null;
@@ -104,15 +103,27 @@ public class PipelineYamlParser {
 
             Map<String, Object> namedInstructions = (Map<String, Object>) entry.getValue();
             List<Object> instructions = (List<Object>) namedInstructions.get("instructions");
-            List<Instruction> instructionList = parseInstructionsList(instructions,pipelineConfiguration);
+            String stageDir = parseStageDir(namedInstructions.get("dir"),pipelineConfiguration);
+            List<Instruction> instructionList = parseInstructionsList(instructions,stageDir);
             stage.setInstructions(instructionList);
             stages.add(stage);
         }
         return stages;
     }
+    private String parseStageDir(Object dir0,Map<String, Object> pipelineConfiguration){
+        if(dir0==null)
+            return (String) pipelineConfiguration.get("dir");
 
-    private List<Instruction> parseInstructionsList(List<Object> instructions,Map<String,Object> pipelineConfiguration) {
-        String dir= (String) pipelineConfiguration.get("dir");
+        String dir=(String) dir0;
+        if(dir.startsWith("/") || dir.startsWith("~"))
+            return dir;
+        else if(dir.startsWith("./"))
+            return name+"/"+dir.substring(2);
+        else
+            return name+"/"+dir;
+    }
+    private List<Instruction> parseInstructionsList(List<Object> instructions,
+                                                    String stageDir) {
         return instructions
                 .stream()
                 .map(o->(Map<String, Object>) o)
@@ -123,12 +134,12 @@ public class PipelineYamlParser {
                     Object value=entry.getValue();
                     switch (key) {
                         case "sh":
-                            return new NativeUnixInstruction((String) value, dir);
+                            return new NativeUnixInstruction((String) value, stageDir);
                         case "ish":
-                            return new NativeUnixInstruction((String) value, dir, true);
+                            return new NativeUnixInstruction((String) value, stageDir, true);
                         case "copy":
                             val copyBlock = (Map<String, Object>) value;
-                            return new CopyJavaInstruction(dir, (String) copyBlock.get("target"), (String) copyBlock.get("dist"),false);
+                            return new CopyJavaInstruction(stageDir, (String) copyBlock.get("target"), (String) copyBlock.get("dist"),false);
                         default:
                             throw new UnknownBuildOperationException(key);
                     }
@@ -140,6 +151,9 @@ public class PipelineYamlParser {
         Map<String, Object> res = (LinkedHashMap<String, Object>) map.get("configuration");
         if (res == null) {
             res = new LinkedHashMap<>();
+        }
+        if(res.containsKey("dir")){
+            res.put("dir",name+"/"+res.get("dir"));
         }
         res.putIfAbsent("delete_after", true);
         res.putIfAbsent("dir",name);

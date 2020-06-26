@@ -1,5 +1,7 @@
 *.log
 mysql_data
+test-ci
+soft-eng
 build.sh
 HELP.md
 target/

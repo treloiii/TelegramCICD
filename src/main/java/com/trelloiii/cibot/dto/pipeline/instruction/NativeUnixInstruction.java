@@ -22,7 +22,8 @@ public class NativeUnixInstruction implements Instruction {
     private String directory;
     private Boolean status;
     private Boolean ignoreOnExit = false;
-    private int limit=3;
+    private int limit = 3;
+
     public NativeUnixInstruction(String text, String directory) {
         this.text = text;
         this.directory = directory;
@@ -35,9 +36,10 @@ public class NativeUnixInstruction implements Instruction {
     }
 
     public int execute(AbstractLogger logger) {
+        ProcessExecutor executor;
         try {
             System.out.println(text);
-            ProcessResult res = new ProcessExecutor(text.split(" "))
+            executor = new ProcessExecutor(text.split(" "))
                     .directory(new File(directory))
                     .readOutput(true)
                     .redirectError(new LogOutputStream() {
@@ -47,15 +49,16 @@ public class NativeUnixInstruction implements Instruction {
                             readLog(s, logger, true);
                         }
                     })
-                    .redirectOutput(new LogOutputStream(){
+                    .redirectOutput(new LogOutputStream() {
                         @Override
                         protected void processLine(String s) {
                             readFileLog(s, logger);
                             readLog(s, logger, false);
                         }
                     })
-                    .execute();
-            readLast(logger,false);
+                    .destroyOnExit();
+            ProcessResult res = executor.execute();
+            readLast(logger, false);
             int code = res.getExitValue();
             status = code == 0;
             if (ignoreOnExit) {
@@ -65,6 +68,9 @@ public class NativeUnixInstruction implements Instruction {
             return code;
         } catch (Exception e) {
             e.printStackTrace();
+            readFileLog(e.getMessage(), logger);
+            readLog(e.getMessage(), logger, true);
+            status=false;
         }
         return -1;
     }

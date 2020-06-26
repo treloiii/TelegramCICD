@@ -7,6 +7,9 @@ import lombok.val;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.HttpException;
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
+import org.zeroturnaround.exec.stream.LogOutputStream;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -28,15 +31,15 @@ public class VCSCloner {
             GitHub gitHub = GitHub.connectUsingOAuth(token);
             Map<String,GHRepository> repos = gitHub.getMyself().getAllRepositories();
             GHRepository repository=VCSUtils.getRepositoryByFullName(repositoryName,repos);//https://<Token>@github.com/user/repo.git
-            Process process = Runtime.getRuntime().exec(new String[]{"git", "clone", String.format("https://%s@github.com/%s.git",token, repository.getFullName())});
-            int res = process.waitFor();
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                System.out.println(line);
-            }
-            System.out.println(res);
+            ProcessResult processResult = new ProcessExecutor("git","clone",String.format("https://%s@github.com/%s.git",token, repository.getFullName()))
+                    .redirectError(new LogOutputStream() {
+                        @Override
+                        protected void processLine(String s) {
+                            System.out.println(s);
+                        }
+                    })
+                    .execute();
+            System.out.println(processResult.getExitValue());
         }
         catch (HttpException e){
             throw new GithubAuthException();
