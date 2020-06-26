@@ -71,4 +71,9 @@ public class CopyJavaInstruction extends JavaInstruction {
             FileUtils.copyFileToDirectory(src,dist);
         }
     }
+
+    @Override
+    public String getText() {
+        return String.format("copy from %s to %s",workingDir,destinationFolder);
+    }
 }

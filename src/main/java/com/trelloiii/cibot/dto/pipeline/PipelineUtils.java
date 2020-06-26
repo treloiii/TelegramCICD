@@ -81,32 +81,27 @@ public class PipelineUtils {
         Pipeline pipeline=pipelineService.getPipeline(pipelineId);
         List<PipelineHistory> pipelineHistory=pipelineHistoryService.getHistoryByPipeline(pipeline);
         SendMessage message=new SendMessage();
-        message.enableMarkdown(true);
         message.setChatId(chatId);
-        String head=String.format("_history of %s_",pipeline.getName());
+        String head=String.format("HISTORY OF %s\n",pipeline.getName());
         if(pipelineHistory.size()>0) {
-            String tableHat=String.join(" | ",
-                    fixedString("Executed at"," "),
-                    fixedString("Status"," "),
-                    fixedString("Failed stage"," "),
-                    fixedString("Failed command"," "));
-            String tableDelimiter=fixedString("","-");
-            StringBuilder stringBuilder=new StringBuilder();
-            stringBuilder.append(head).append("\n");
-            stringBuilder.append(tableHat).append("\n").append(tableDelimiter).append("\n");
+            StringBuilder stringBuilder=new StringBuilder(head);
             for(PipelineHistory history:pipelineHistory){
-                stringBuilder.append(String.join(
-                        " | ",
-                        fixedString(history.getExecutedAt().format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm"))," "),
-                        fixedString(!history.getStatus() ? "success" : "failed"," "),
-                        fixedString(history.getFailed_stage()==null?"":history.getFailed_stage()," "),
-                        fixedString(history.getFailed_instruction()==null?"":history.getFailed_instruction()," ")
-                ))
-                        .append("\n");
+                String execAt=String.format("EXECUTED AY: %s",history.getExecutedAt());
+                String status=String.format("STATUS: %s",history.getStatus());
+                stringBuilder.append(execAt).append("\n")
+                        .append(status).append("\n");
+                if(!history.getStatus()){
+                    String failedStage=String.format("FAILED STAGE: %s",history.getFailed_stage());
+                    String failedCommand=String.format("FAILED COMMAND: %s",history.getFailed_instruction());
+                    stringBuilder.append(failedStage).append("\n")
+                            .append(failedCommand).append("\n");
+                }
+                stringBuilder.append("_____\n");
             }
             message.setText(stringBuilder.toString());
         }
         else{
+            message.enableMarkdown(true);
             message.setText(head+"\n"+"*EMPTY*");
         }
         sendMessage.apply(message);
@@ -125,16 +120,5 @@ public class PipelineUtils {
         PipelineYamlParser parser = new PipelineYamlParser(pipeline);
         pipeline = parser.parse();
         pipelineService.execute(new QuietPipeline(pipeline, new QuietLogger(pipeline)));
-    }
-    private String fixedString(String s,String joiner){
-        StringBuilder sb=new StringBuilder();
-        sb.append(s);
-        int len=joiner.equals(" ")?50:150;
-        if (s.length()<len) {
-            for (int i = 0; i < len-s.length(); i++) {
-                sb.append(joiner);
-            }
-        }
-        return sb.toString();
     }
 }

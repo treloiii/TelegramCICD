@@ -51,4 +51,9 @@ public class RemoveJavaInstruction extends JavaInstruction {
             throw new RuntimeException();
         }
     }
+
+    @Override
+    public String getText() {
+        return String.format("removing %s",targetFile);
+    }
 }
